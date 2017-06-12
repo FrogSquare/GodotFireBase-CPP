@@ -1,14 +1,13 @@
 /** firebase.h **/
 
 #include "gd_firebase.h"
-#include "jnihelper.h"
 
 #ifdef ANDROID_ENABLED
 #ifdef GD_FIREBASE_DEBUG
 	#include <sys/prctl.h>
 #endif
 
-#include "platform/android/java_glue.h"
+	#include "jnihelper.h"
 #endif
 
 extern "C" {
@@ -53,35 +52,12 @@ void GDFireBase::initFireBase () {
 #ifdef ANDROID_ENABLED
 
 	LOGI("Firebase:Initializing");
-	env = ThreadAndroid::get_env();
-	this->app = ::firebase::App::Create(env, GDFireBase::instance);
-	LOGI("Working.. Done");
+	this->app = ::firebase::App::Create(JNIHelper::getEnv(), JNIHelper::getActivity());
 #else
 	this->app = ::firebase::App::Create();
 #endif
 	initAnalytics ();
 #endif
-	JniMethodInfo t;
-	if (JNIHelper::getStaticMethodInfo(t,
-					"org/godotengine/godot/Godot",
-					"receiveCppMessage",
-					"(Ljava/lang/String;)Ljava/lang/String;")) {
-		LOGI("Thi sis heree.>!");
-
-		jstring stringArg1 = t.env->NewStringUTF("Thi sis text");
-		jstring retString =
-		(jstring) t.env->CallStaticObjectMethod(t.classID, t.methodID, stringArg1);
-
-		t.env->DeleteLocalRef(stringArg1);
-		t.env->DeleteLocalRef(t.classID);
-
-		const char *nativeString = t.env->GetStringUTFChars(retString, 0);
-		std::string retParamsStr(nativeString);
-		t.env->ReleaseStringUTFChars(retString, nativeString);
-
-		LOGI("Recived text: %s", retParamsStr.c_str());
-	}
-
 }
 
 void GDFireBase::init (String data, int script_id) {
