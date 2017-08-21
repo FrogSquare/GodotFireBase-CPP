@@ -17,12 +17,12 @@
 #ifndef GD_ANALYTICS_H
 #define GD_ANALYTICS_H
 
-#include "reference.h"
 #include "gd_config.h"
+#include "reference.h"
 
 #if GD_FIREBASE_ANALYTICS
 
-#if (defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED))
+#ifdef GD_FIREBASE_ANDROID_IOS
 #include "firebase/analytics.h"
 #include "firebase/analytics/event_names.h"
 #include "firebase/analytics/parameter_names.h"
@@ -38,41 +38,39 @@ namespace analytics = ::firebase::analytics;
 
 NS_GODOT_BEGINE
 
-class GDAnalytics : public Reference {
+class GDAnalytics {
 public:
 	GDAnalytics();
 
-#if defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED)
-	void init(::firebase::App* app);
+#ifdef GD_FIREBASE_ANDROID_IOS
+	void init(::firebase::App *app);
 #endif
 
-	void set_screen_name(const char* screenName);
-	void send_achievement(const char* id);
-	void send_group(const char* group_id);
-	void send_level_up(const char* character, int level);
-	void send_score(const char* character, int level, int score);
-	void send_content(const char* content_type, const char* item_id);
+	void set_screen_name(const char *screenName);
+	void send_achievement(const char *id);
+	void send_group(const char *group_id);
+	void send_level_up(const char *character, int level);
+	void send_score(const char *character, int level, int score);
+	void send_content(const char *content_type, const char *item_id);
 
 	void send_share();
 
-	void earn_currency(const char* currency_name, int value);
-	void spend_currency(const char* item_name, const char* currency_name, int value);
+	void earn_currency(const char *currency_name, int value);
+	void spend_currency(const char *item_name, const char *currency_name, int value);
 
 	void send_tutorial_begin();
 	void send_tutorial_complete();
 
-	void send_events(const char* eventName, Dictionary keyValues);
-	void send_custom(const char* key, const char* value);
+	void send_events(const char *eventName, Dictionary keyValues);
+	void send_custom(const char *key, const char *value);
 
 	static GDAnalytics *getInstance();
 
 private:
 	static GDAnalytics *mInstance;
 
-#if defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED)
-	::firebase::App* _app;
-
-	static jobject _activity;
+#ifdef GD_FIREBASE_ANDROID_IOS
+	::firebase::App *_app;
 #endif
 };
 

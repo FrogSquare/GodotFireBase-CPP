@@ -14,4 +14,8 @@
 #define GD_FIREBASE_REMOTECONFIG	1
 #define GD_FIREBASE_STORAGE		1
 
+#if GD_FIREBASE_ADMOB
+// The AdMob app IDs.
+#endif
+
 #endif // __GD_FIREBASE_CONFIG_H__

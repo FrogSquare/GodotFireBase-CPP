@@ -4,11 +4,9 @@
 #define __GD_FIREBASE_H__
 
 #include "gd_config.h"
-#include "gd_analytics.h"
-
 #include "reference.h"
 
-#if defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED)
+#ifdef GD_FIREBASE_ANDROID_IOS
 #include "firebase/analytics.h"
 #include "firebase/analytics/event_names.h"
 #include "firebase/analytics/parameter_names.h"
@@ -23,7 +21,7 @@
 NS_GODOT_BEGINE
 
 class GDFireBase : public Reference {
-	OBJ_TYPE(GDFireBase, Reference);
+	OBJ_TYPE(GDFireBase, Reference)
 
 public:
 	GDFireBase();
@@ -34,6 +32,7 @@ public:
 
 #if GD_FIREBASE_ANALYTICS
 	void initAnalytics();
+	void initRemoteConfig();
 
 	void setScreenName(String screen_name);
 	void sendAchievement(String a_id);
@@ -58,12 +57,11 @@ public:
 	static jobject instance;
 #endif
 
-
 protected:
 	static void _bind_methods();
 
 private:
-#if defined(ANDROID_ENABLED) || defined(IPHONE_ENABLED)
+#ifdef GD_FIREBASE_ANDROID_IOS
 	::firebase::App *app;
 #endif
 };
