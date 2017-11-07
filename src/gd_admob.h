@@ -22,19 +22,21 @@
 
 #ifdef GD_FIREBASE_ADMOB
 
+#if GD_FIREBASE_ANDROID_IOS
 #include "firebase/admob.h"
 #include "firebase/app.h"
+#endif
 
 NS_GODOT_BEGINE
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 const char *k_AdMobAppID = "ca-app-pub-3940256099942544~3347511713";
 #else
 const char *k_AdMobAppID = "";
 #endif
 
 // These ad units are configured to always serve test ads.
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 const char *k_AdViewAdUnit = "ca-app-pub-3940256099942544/6300978111";
 const char *k_InterstitialAdUnit = "ca-app-pub-3940256099942544/1033173712";
 const char *k_RewardedVideoAdUnit = "ca-app-pub-3940256099942544/2888167318";

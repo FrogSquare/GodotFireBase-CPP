@@ -22,7 +22,7 @@
 
 #if GD_FIREBASE_ANALYTICS
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #include "firebase/analytics.h"
 #include "firebase/analytics/event_names.h"
 #include "firebase/analytics/parameter_names.h"
@@ -42,7 +42,7 @@ class GDAnalytics {
 public:
 	GDAnalytics();
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	void init(::firebase::App *app);
 #endif
 
@@ -69,7 +69,7 @@ public:
 private:
 	static GDAnalytics *mInstance;
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	::firebase::App *_app;
 #endif
 };

@@ -19,7 +19,7 @@
 
 #if GD_FIREBASE_REMOTECONFIG
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #include "firebase/app.h"
 #include "firebase/remote_config.h"
 #include "firebase/util.h"
@@ -39,7 +39,7 @@ public:
 	GDRemoteConfig() {}
 	virtual ~GDRemoteConfig() {}
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	void init(::firebase::App *app);
 #endif
 
@@ -53,7 +53,7 @@ public:
 private:
 	void fetchRemoteConfigs();
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	::firebase::App *_app;
 #endif
 

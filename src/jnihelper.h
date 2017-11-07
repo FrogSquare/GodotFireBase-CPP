@@ -17,15 +17,15 @@
 #ifndef __GD_JNIHELPER_H__
 #define __GD_JNIHELPER_H__
 
-#include <jni.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <functional>
 #include "math/vector3.h"
+#include <jni.h>
+#include <functional>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-#include "variant.h"
 #include "gd_config.h"
+#include "variant.h"
 
 NS_GODOT_BEGINE
 
@@ -39,9 +39,8 @@ struct jvalret {
 	jobject obj;
 	jvalue val;
 
-	jvalret() { obj=NULL; }
+	jvalret() { obj = NULL; }
 };
-
 
 class JNIHelper {
 public:
@@ -52,26 +51,26 @@ public:
 
 	static bool setClassLoaderFrom(jobject activityInstance);
 	static bool getStaticMethodInfo(
-	JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode);
+			JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode);
 
 	static bool getMethodInfo(
-	JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode);
+			JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode);
 
 	static jmethodID loadclassMethod_methodID;
 	static jobject classLoader;
 	static std::function<void()> classloaderCallback;
 
 	static jvalret varientToJvalue(JNIEnv *env, Variant::Type p_type, const Variant arg, bool force_jobject = false);
-	static Variant JObjectToVarient (JNIEnv * env, jobject obj);
+	static Variant JObjectToVarient(JNIEnv *env, jobject obj);
 
 	template <typename... Ts>
 	static void CallStaticVoidMethod(const std::string &className,
-					 const std::string &methodName,
-					 Ts... xs) {
+			const std::string &methodName,
+			Ts... xs) {
 
 		JniMethodInfo t;
 		std::string signature = "(" + std::string(getJNISignature(xs...)) + ")V";
-		if (JNIHelper::getStaticMethodInfo (t, className.c_str(), methodName.c_str(), signature.c_str())) {
+		if (JNIHelper::getStaticMethodInfo(t, className.c_str(), methodName.c_str(), signature.c_str())) {
 			t.env->CallStaticVoidMethod(t.classID, t.methodID, convert(t, xs)...);
 			t.env->DeleteLocalRef(t.classID);
 			deleteLocalRefs(t.env);
@@ -79,34 +78,35 @@ public:
 			LOGI("Error here..!");
 		}
 	}
+
 private:
-	static JNIEnv *cacheEnv(JavaVM* jvm);
+	static JNIEnv *cacheEnv(JavaVM *jvm);
 
 	static bool getMethodInfo_DefaultClassLoader(
-	JniMethodInfo &methdInfo, const char *className, const char *methodName, const char *paramCode);
+			JniMethodInfo &methdInfo, const char *className, const char *methodName, const char *paramCode);
 
 	static JavaVM *_psJavaVM;
 	static jobject _activity;
 
 	static jstring convert(JniMethodInfo &t, Variant x);
 
-	template<typename T>
-	static T convert (JniMethodInfo &t, T x) {
+	template <typename T>
+	static T convert(JniMethodInfo &t, T x) {
 		return x;
 	}
 
-	static std::unordered_map<JNIEnv*, std::vector<jobject>> localRefs;
+	static std::unordered_map<JNIEnv *, std::vector<jobject> > localRefs;
 	static void deleteLocalRefs(JNIEnv *env);
 
 	static std::string getJNISignature() {
 		return "";
 	}
 
-	static std::string getJNISignature (bool) {
+	static std::string getJNISignature(bool) {
 		return "Z";
 	}
 
-	static std::string getJNISignature (char) {
+	static std::string getJNISignature(char) {
 		return "C";
 	}
 
@@ -126,15 +126,15 @@ private:
 		return "F";
 	}
 
-	static  std::string getJNISignature(double) {
+	static std::string getJNISignature(double) {
 		return "D";
 	}
 
-	static std::string getJNISignature(const char*) {
+	static std::string getJNISignature(const char *) {
 		return "Ljava/lang/String;";
 	}
 
-	static std::string getJNISignature(const std::string&) {
+	static std::string getJNISignature(const std::string &) {
 		return "Ljava/lang/String;";
 	}
 
@@ -149,7 +149,6 @@ private:
 	static std::string getJNISignature(T x, Ts... xs) {
 		return getJNISignature(x) + getJNISignature(xs...);
 	}
-
 };
 
 NS_GODOT_END

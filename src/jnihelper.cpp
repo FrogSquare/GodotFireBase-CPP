@@ -14,10 +14,12 @@
  * limitations under the License.
  **/
 
+#ifdef ANDROID_ENABLED
+
 #include "jnihelper.h"
 #include <android/log.h>
-#include <string.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "print_string.h"
 
@@ -30,13 +32,13 @@ jclass _getClassID(const char *className) {
 		return nullptr;
 	}
 
-	JNIEnv *env = godot::JNIHelper::getEnv ();
+	JNIEnv *env = godot::JNIHelper::getEnv();
 
 	jstring _jstrClassName = env->NewStringUTF(className);
-	jclass _clazz = (jclass) env->CallObjectMethod(
-				godot::JNIHelper::classLoader,
-				godot::JNIHelper::loadclassMethod_methodID,
-				_jstrClassName);
+	jclass _clazz = (jclass)env->CallObjectMethod(
+			godot::JNIHelper::classLoader,
+			godot::JNIHelper::loadclassMethod_methodID,
+			_jstrClassName);
 
 	if (_clazz == nullptr) {
 		LOGI("ClassLoader failed to find class of %s", className);
@@ -47,24 +49,24 @@ jclass _getClassID(const char *className) {
 	return _clazz;
 }
 
-String _getClassName(JNIEnv * env, jclass cls, bool* array) {
+String _getClassName(JNIEnv *env, jclass cls, bool *array) {
 
 	jclass cclass = env->FindClass("java/lang/Class");
 	jmethodID getName = env->GetMethodID(cclass, "getName", "()Ljava/lang/String;");
-	jstring clsName=(jstring) env->CallObjectMethod(cls, getName);
+	jstring clsName = (jstring)env->CallObjectMethod(cls, getName);
 
 	if (array) {
 		jmethodID isArray = env->GetMethodID(cclass, "isArray", "()Z");
 		jboolean isarr = env->CallBooleanMethod(cls, isArray);
 		(*array) = isarr ? true : false;
 	}
-	String name = env->GetStringUTFChars( clsName, NULL );
+	String name = env->GetStringUTFChars(clsName, NULL);
 	env->DeleteLocalRef(clsName);
 
 	return name;
 }
 
-void _detachCurrentThread(void* a) {
+void _detachCurrentThread(void *a) {
 	godot::JNIHelper::getJavaVM()->DetachCurrentThread();
 }
 
@@ -76,15 +78,15 @@ jobject JNIHelper::classLoader = nullptr;
 std::function<void()> JNIHelper::classloaderCallback = nullptr;
 
 jobject JNIHelper::_activity = nullptr;
-std::unordered_map<JNIEnv*, std::vector<jobject>> JNIHelper::localRefs;
+std::unordered_map<JNIEnv *, std::vector<jobject> > JNIHelper::localRefs;
 
-JavaVM *JNIHelper::getJavaVM () {
+JavaVM *JNIHelper::getJavaVM() {
 	pthread_t thisthread = pthread_self();
 	LOGD("JniHelper::getJavaVM(), pthread_self() = %ld", thisthread);
 	return _psJavaVM;
 }
 
-void JNIHelper::setJavaVM (JavaVM *javaVM) {
+void JNIHelper::setJavaVM(JavaVM *javaVM) {
 	pthread_t thisthread = pthread_self();
 	LOGD("JniHelper::setJavaVM(%p), pthread_self() = %ld", javaVM, thisthread);
 	_psJavaVM = javaVM;
@@ -92,77 +94,77 @@ void JNIHelper::setJavaVM (JavaVM *javaVM) {
 	pthread_key_create(&g_key, _detachCurrentThread);
 }
 
-JNIEnv *JNIHelper::cacheEnv (JavaVM *jvm) {
+JNIEnv *JNIHelper::cacheEnv(JavaVM *jvm) {
 	JNIEnv *_env = nullptr;
 	// get jni environment
 
 	LOGI("Working..!");
-	jint ret = jvm->GetEnv((void**)&_env, JNI_VERSION_1_6);
+	jint ret = jvm->GetEnv((void **)&_env, JNI_VERSION_1_6);
 
 	switch (ret) {
-	case JNI_OK:
-		pthread_setspecific(g_key, _env);
-		return _env;
-	case JNI_EDETACHED:
-		if (jvm->AttachCurrentThread(&_env, nullptr) < 0) {
-			LOGE("Failed to get the environment using AttachCurrentThread()");
-			return nullptr;
-		} else {
-			// Success : Attached and obtained JNIEnv!
+		case JNI_OK:
 			pthread_setspecific(g_key, _env);
 			return _env;
-		}
-	case JNI_EVERSION:
-		// Cannot recover from this error
-		LOGE("JNI interface version 1.4 not supported");
-	default:
-		LOGE("Failed to get the environment using GetEnv()");
-		return nullptr;
+		case JNI_EDETACHED:
+			if (jvm->AttachCurrentThread(&_env, nullptr) < 0) {
+				LOGE("Failed to get the environment using AttachCurrentThread()");
+				return nullptr;
+			} else {
+				// Success : Attached and obtained JNIEnv!
+				pthread_setspecific(g_key, _env);
+				return _env;
+			}
+		case JNI_EVERSION:
+			// Cannot recover from this error
+			LOGE("JNI interface version 1.4 not supported");
+		default:
+			LOGE("Failed to get the environment using GetEnv()");
+			return nullptr;
 	}
 	LOGI("Working.. Done");
 }
 
-JNIEnv *JNIHelper::getEnv () {
-	JNIEnv *_env = (JNIEnv*) pthread_getspecific(g_key);
+JNIEnv *JNIHelper::getEnv() {
+	JNIEnv *_env = (JNIEnv *)pthread_getspecific(g_key);
 
 	if (_env == nullptr) {
-		_env = JNIHelper::cacheEnv (_psJavaVM);
+		_env = JNIHelper::cacheEnv(_psJavaVM);
 	}
 	return _env;
 }
 
-jobject JNIHelper::getActivity () {
+jobject JNIHelper::getActivity() {
 	return _activity;
 }
 
-bool JNIHelper::setClassLoaderFrom (jobject activityinstance) {
+bool JNIHelper::setClassLoaderFrom(jobject activityinstance) {
 	JniMethodInfo _getclassloaderMethod;
 
-	if (!JNIHelper::getMethodInfo_DefaultClassLoader (_getclassloaderMethod,
-							  "android/content/Context",
-							  "getClassLoader",
-							  "()Ljava/lang/ClassLoader;")) {
+	if (!JNIHelper::getMethodInfo_DefaultClassLoader(_getclassloaderMethod,
+				"android/content/Context",
+				"getClassLoader",
+				"()Ljava/lang/ClassLoader;")) {
 		return false;
 	}
 
-	jobject _c = JNIHelper::getEnv ()->CallObjectMethod(activityinstance,
-							     _getclassloaderMethod.methodID);
+	jobject _c = JNIHelper::getEnv()->CallObjectMethod(activityinstance,
+			_getclassloaderMethod.methodID);
 
 	if (_c == nullptr) {
 		return false;
 	}
 
 	JniMethodInfo _m;
-	if (!JNIHelper::getMethodInfo_DefaultClassLoader (_m,
-							  "java/lang/ClassLoader",
-							  "loadClass",
-							  "(Ljava/lang/String;)Ljava/lang/Class;")) {
+	if (!JNIHelper::getMethodInfo_DefaultClassLoader(_m,
+				"java/lang/ClassLoader",
+				"loadClass",
+				"(Ljava/lang/String;)Ljava/lang/Class;")) {
 		return false;
 	}
 
-	JNIHelper::classLoader = JNIHelper::getEnv ()->NewGlobalRef(_c);
+	JNIHelper::classLoader = JNIHelper::getEnv()->NewGlobalRef(_c);
 	JNIHelper::loadclassMethod_methodID = _m.methodID;
-	JNIHelper::_activity = JNIHelper::getEnv ()->NewGlobalRef(activityinstance);
+	JNIHelper::_activity = JNIHelper::getEnv()->NewGlobalRef(activityinstance);
 
 	if (JNIHelper::classloaderCallback != nullptr) {
 		JNIHelper::classloaderCallback();
@@ -171,19 +173,19 @@ bool JNIHelper::setClassLoaderFrom (jobject activityinstance) {
 	return true;
 }
 
-bool JNIHelper::getStaticMethodInfo (JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode) {
+bool JNIHelper::getStaticMethodInfo(JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode) {
 	if (className == nullptr || methodName == nullptr || paramCode == nullptr) {
 		return false;
 	}
 
-	JNIEnv *env = JNIHelper::getEnv ();
+	JNIEnv *env = JNIHelper::getEnv();
 
 	if (!env) {
 		LOGE("Failed to get JNIEnv");
 		return false;
 	}
 
-	jclass classID = _getClassID (className);
+	jclass classID = _getClassID(className);
 	if (!classID) {
 		LOGE("Failed to find class %s", className);
 		env->ExceptionClear();
@@ -205,17 +207,17 @@ bool JNIHelper::getStaticMethodInfo (JniMethodInfo &methodInfo, const char *clas
 	return true;
 }
 
-bool JNIHelper::getMethodInfo_DefaultClassLoader (JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode) {
+bool JNIHelper::getMethodInfo_DefaultClassLoader(JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode) {
 	if (className == nullptr || methodName == nullptr || paramCode == nullptr) {
 		return false;
 	}
 
-	JNIEnv *env = JNIHelper::getEnv ();
+	JNIEnv *env = JNIHelper::getEnv();
 	if (!env) {
 		return false;
 	}
 
-	jclass classID = env->FindClass (className);
+	jclass classID = env->FindClass(className);
 	if (!classID) {
 		LOGE("Failed to find class %s", className);
 		env->ExceptionClear();
@@ -236,17 +238,17 @@ bool JNIHelper::getMethodInfo_DefaultClassLoader (JniMethodInfo &methodInfo, con
 	return true;
 }
 
-bool JNIHelper::getMethodInfo (JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode) {
+bool JNIHelper::getMethodInfo(JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode) {
 	if (className == nullptr || methodName == nullptr || paramCode == nullptr) {
 		return false;
 	}
 
-	JNIEnv *env = JNIHelper::getEnv ();
+	JNIEnv *env = JNIHelper::getEnv();
 	if (!env) {
 		return false;
 	}
 
-	jclass classID = _getClassID (className);
+	jclass classID = _getClassID(className);
 	if (!classID) {
 		LOGE("Failed to find class %s", className);
 		env->ExceptionClear();
@@ -267,28 +269,30 @@ bool JNIHelper::getMethodInfo (JniMethodInfo &methodInfo, const char *className,
 	return true;
 }
 
-jstring JNIHelper::convert (JniMethodInfo &t, Variant x) {
-	jvalret ret = varientToJvalue (t.env, x.get_type(), x);
+jstring JNIHelper::convert(JniMethodInfo &t, Variant x) {
+	jvalret ret = varientToJvalue(t.env, x.get_type(), x);
 	localRefs[t.env].push_back(ret.obj);
 
 	return (jstring)ret.obj;
 }
 
-void JNIHelper::deleteLocalRefs (JNIEnv *env) {
-	if (!env) { return; }
+void JNIHelper::deleteLocalRefs(JNIEnv *env) {
+	if (!env) {
+		return;
+	}
 
-	for (const auto& ref : localRefs[env]) {
+	for (const auto &ref : localRefs[env]) {
 		env->DeleteLocalRef(ref);
 	}
 
 	localRefs[env].clear();
 }
 
-jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Variant arg, bool force_jobject) {
+jvalret JNIHelper::varientToJvalue(JNIEnv *env, Variant::Type p_type, const Variant arg, bool force_jobject) {
 	const Variant *p_arg = &arg;
 	jvalret v;
 
-	switch(p_type) {
+	switch (p_type) {
 
 		case Variant::BOOL: {
 
@@ -299,11 +303,10 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 				val.z = (bool)(*p_arg);
 				jobject obj = env->NewObjectA(bclass, ctor, &val);
 				v.val.l = obj;
-				v.obj=obj;
+				v.obj = obj;
 				env->DeleteLocalRef(bclass);
 			} else {
-				v.val.z=*p_arg;
-
+				v.val.z = *p_arg;
 			};
 		} break;
 		case Variant::INT: {
@@ -316,12 +319,11 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 				val.i = (int)(*p_arg);
 				jobject obj = env->NewObjectA(bclass, ctor, &val);
 				v.val.l = obj;
-				v.obj=obj;
+				v.obj = obj;
 				env->DeleteLocalRef(bclass);
 
 			} else {
-				v.val.i=*p_arg;
-
+				v.val.i = *p_arg;
 			};
 		} break;
 		case Variant::REAL: {
@@ -334,33 +336,33 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 				val.d = (double)(*p_arg);
 				jobject obj = env->NewObjectA(bclass, ctor, &val);
 				v.val.l = obj;
-				v.obj=obj;
+				v.obj = obj;
 				env->DeleteLocalRef(bclass);
 
 			} else {
-				v.val.f=*p_arg;
+				v.val.f = *p_arg;
 			};
 		} break;
 		case Variant::STRING: {
 
 			String s = *p_arg;
 			jstring jStr = env->NewStringUTF(s.utf8().get_data());
-			v.val.l=jStr;
-			v.obj=jStr;
+			v.val.l = jStr;
+			v.obj = jStr;
 		} break;
 		case Variant::STRING_ARRAY: {
 
 			DVector<String> sarray = *p_arg;
-			jobjectArray arr = env->NewObjectArray(sarray.size(),env->FindClass("java/lang/String"),env->NewStringUTF(""));
+			jobjectArray arr = env->NewObjectArray(sarray.size(), env->FindClass("java/lang/String"), env->NewStringUTF(""));
 
-			for(int j=0;j<sarray.size();j++) {
+			for (int j = 0; j < sarray.size(); j++) {
 
-				jstring str = env->NewStringUTF( sarray[j].utf8().get_data() );
-				env->SetObjectArrayElement(arr,j,str);
+				jstring str = env->NewStringUTF(sarray[j].utf8().get_data());
+				env->SetObjectArrayElement(arr, j, str);
 				env->DeleteLocalRef(str);
 			}
-			v.val.l=arr;
-			v.obj=arr;
+			v.val.l = arr;
+			v.obj = arr;
 
 		} break;
 
@@ -374,7 +376,7 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 			Array keys = dict.keys();
 
 			jobjectArray jkeys = env->NewObjectArray(keys.size(), env->FindClass("java/lang/String"), env->NewStringUTF(""));
-			for (int j=0; j<keys.size(); j++) {
+			for (int j = 0; j < keys.size(); j++) {
 				jstring str = env->NewStringUTF(String(keys[j]).utf8().get_data());
 				env->SetObjectArrayElement(jkeys, j, str);
 				env->DeleteLocalRef(str);
@@ -388,9 +390,9 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 
 			jobjectArray jvalues = env->NewObjectArray(keys.size(), env->FindClass("java/lang/Object"), NULL);
 
-			for (int j=0; j<keys.size(); j++) {
+			for (int j = 0; j < keys.size(); j++) {
 				Variant var = dict[keys[j]];
-				jvalret v = varientToJvalue (env, var.get_type(), var, true);
+				jvalret v = varientToJvalue(env, var.get_type(), var, true);
 				env->SetObjectArrayElement(jvalues, j, v.val.l);
 				if (v.obj) {
 					env->DeleteLocalRef(v.obj);
@@ -404,7 +406,7 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 			env->DeleteLocalRef(dclass);
 
 			v.val.l = jdict;
-			v.obj=jdict;
+			v.obj = jdict;
 		} break;
 
 		case Variant::INT_ARRAY: {
@@ -412,18 +414,18 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 			DVector<int> array = *p_arg;
 			jintArray arr = env->NewIntArray(array.size());
 			DVector<int>::Read r = array.read();
-			env->SetIntArrayRegion(arr,0,array.size(),r.ptr());
-			v.val.l=arr;
-			v.obj=arr;
+			env->SetIntArrayRegion(arr, 0, array.size(), r.ptr());
+			v.val.l = arr;
+			v.obj = arr;
 
 		} break;
 		case Variant::RAW_ARRAY: {
 			DVector<uint8_t> array = *p_arg;
 			jbyteArray arr = env->NewByteArray(array.size());
 			DVector<uint8_t>::Read r = array.read();
-			env->SetByteArrayRegion(arr,0,array.size(),reinterpret_cast<const signed char*>(r.ptr()));
-			v.val.l=arr;
-			v.obj=arr;
+			env->SetByteArrayRegion(arr, 0, array.size(), reinterpret_cast<const signed char *>(r.ptr()));
+			v.val.l = arr;
+			v.obj = arr;
 
 		} break;
 		case Variant::REAL_ARRAY: {
@@ -431,21 +433,20 @@ jvalret JNIHelper::varientToJvalue (JNIEnv *env, Variant::Type p_type, const Var
 			DVector<float> array = *p_arg;
 			jfloatArray arr = env->NewFloatArray(array.size());
 			DVector<float>::Read r = array.read();
-			env->SetFloatArrayRegion(arr,0,array.size(),r.ptr());
-			v.val.l=arr;
-			v.obj=arr;
+			env->SetFloatArrayRegion(arr, 0, array.size(), r.ptr());
+			v.val.l = arr;
+			v.obj = arr;
 
 		} break;
 		default: {
 
 			v.val.i = 0;
 		} break;
-
 	}
 	return v;
 }
 
-Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
+Variant JNIHelper::JObjectToVarient(JNIEnv *env, jobject obj) {
 
 	if (obj == NULL) {
 		return Variant();
@@ -453,15 +454,14 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 
 	jclass c = env->GetObjectClass(obj);
 	bool array;
-	String name = _getClassName (env, c, &array);
+	String name = _getClassName(env, c, &array);
 	//print_line("name is " + name + ", array "+Variant(array));
 
-	print_line("ARGNAME: "+name);
+	print_line("ARGNAME: " + name);
 	if (name == "java.lang.String") {
 
-		return String::utf8(env->GetStringUTFChars( (jstring)obj, NULL ));
+		return String::utf8(env->GetStringUTFChars((jstring)obj, NULL));
 	};
-
 
 	if (name == "[Ljava.lang.String;") {
 
@@ -470,11 +470,10 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 		//print_line("String array! " + String::num(stringCount));
 		DVector<String> sarr;
 
-		for (int i=0; i<stringCount; i++) {
-			jstring string = (jstring) env->GetObjectArrayElement(arr, i);
+		for (int i = 0; i < stringCount; i++) {
+			jstring string = (jstring)env->GetObjectArrayElement(arr, i);
 			sarr.push_back(String::utf8(env->GetStringUTFChars(string, NULL)));
 			env->DeleteLocalRef(string);
-
 		}
 
 		return sarr;
@@ -503,7 +502,7 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 		sarr.resize(fCount);
 
 		DVector<int>::Write w = sarr.write();
-		env->GetIntArrayRegion(arr,0,fCount,w.ptr());
+		env->GetIntArrayRegion(arr, 0, fCount, w.ptr());
 		w = DVector<int>::Write();
 		return sarr;
 	};
@@ -516,7 +515,7 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 		sarr.resize(fCount);
 
 		DVector<uint8_t>::Write w = sarr.write();
-		env->GetByteArrayRegion(arr,0,fCount,reinterpret_cast<signed char*>(w.ptr()));
+		env->GetByteArrayRegion(arr, 0, fCount, reinterpret_cast<signed char *>(w.ptr()));
 		w = DVector<uint8_t>::Write();
 		return sarr;
 	};
@@ -538,12 +537,11 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 
 		RealArray::Write w = sarr.write();
 
-		for (int i=0; i<fCount; i++) {
+		for (int i = 0; i < fCount; i++) {
 
 			double n;
 			env->GetDoubleArrayRegion(arr, i, 1, &n);
 			w.ptr()[i] = n;
-
 		};
 		return sarr;
 	};
@@ -555,19 +553,16 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 		RealArray sarr;
 		sarr.resize(fCount);
 
-
 		RealArray::Write w = sarr.write();
 
-		for (int i=0; i<fCount; i++) {
+		for (int i = 0; i < fCount; i++) {
 
 			float n;
 			env->GetFloatArrayRegion(arr, i, 1, &n);
 			w.ptr()[i] = n;
-
 		};
 		return sarr;
 	};
-
 
 	if (name == "[Ljava.lang.Object;") {
 
@@ -575,12 +570,11 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 		int objCount = env->GetArrayLength(arr);
 		Array varr(true);
 
-		for (int i=0; i<objCount; i++) {
+		for (int i = 0; i < objCount; i++) {
 			jobject jobj = env->GetObjectArrayElement(arr, i);
-			Variant v = JObjectToVarient (env, jobj);
+			Variant v = JObjectToVarient(env, jobj);
 			varr.push_back(v);
 			env->DeleteLocalRef(jobj);
-
 		}
 
 		return varr;
@@ -593,21 +587,20 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 		jmethodID get_keys = env->GetMethodID(oclass, "get_keys", "()[Ljava/lang/String;");
 		jobjectArray arr = (jobjectArray)env->CallObjectMethod(obj, get_keys);
 
-		StringArray keys = JObjectToVarient (env, arr);
+		StringArray keys = JObjectToVarient(env, arr);
 		env->DeleteLocalRef(arr);
 
 		jmethodID get_values = env->GetMethodID(oclass, "get_values", "()[Ljava/lang/Object;");
 		arr = (jobjectArray)env->CallObjectMethod(obj, get_values);
 
-		Array vals = JObjectToVarient (env, arr);
+		Array vals = JObjectToVarient(env, arr);
 		env->DeleteLocalRef(arr);
 
 		//print_line("adding " + String::num(keys.size()) + " to Dictionary!");
-		for (int i=0; i<keys.size(); i++) {
+		for (int i = 0; i < keys.size(); i++) {
 
 			ret[keys[i]] = vals[i];
 		};
-
 
 		return ret;
 	};
@@ -618,4 +611,4 @@ Variant JNIHelper::JObjectToVarient (JNIEnv * env, jobject obj) {
 }
 
 NS_GODOT_END
-
+#endif

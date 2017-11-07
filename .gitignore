@@ -1,6 +1,11 @@
 
 firebase_cpp_sdk/
 
+GodotFireBaseCPP.config
+GodotFireBaseCPP.creator
+GodotFireBaseCPP.files
+GodotFireBaseCPP.includes
+
 *.o
 *.pyc
 

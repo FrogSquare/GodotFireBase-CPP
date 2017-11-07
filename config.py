@@ -1,62 +1,95 @@
 
+# Update this to customize the module
+_config = {
+"Analytics"      : True,
+"AdMob"          : True,
+"Invites"        : True,
+"RemoteConfig"   : True,
+"Notification"   : True,
+"Storage"        : True,
+"Firestore"      : False,
+
+"Authentication" : True,
+"AuthGoogle"     : True,
+"AuthFacebook"   : True,
+"AuthTwitter"    : True
+}
+
+linkflags = ['app', 'analytics']
+
 def can_build(plat):
-	#return False;
-	return (plat == "android" or plat == "x11" or plat == "iphone")
+    #return False;
+    return (plat == "android" or plat == "x11" or plat == "iphone")
 
 def configure(env):
-	if env["platform"] == "android":
-		firebase_sdk_libs = ''
+    if env["platform"] == "android" or env["platform"] == "iphone":
+        if _config["AdMob"]:
+            if env["platform"] == "android":
+                env.android_add_dependency("compile 'com.google.firebase:firebase-ads:10.0.1'")
 
-		if env["android_arch"] == "armv6":
-			firebase_sdk_libs = \
-			'#modules/gdfirebase/firebase_cpp_sdk/libs/android/armeabi/c++/'
-		elif env["android_arch"] == "armv7":
-			firebase_sdk_libs = \
-			'#modules/gdfirebase/firebase_cpp_sdk/libs/android/armeabi-v7a/c++/'
-		elif env["android_arch"] == "x86":
-			firebase_sdk_libs = \
-			'#modules/gdfirebase/firebase_cpp_sdk/libs/android/x86/c++/'
-		else:
-			print("ERR: Arch not supported by godot..!");
-			return;
+            linkflags.append('admob')
 
-		print(firebase_sdk_libs);
+        if _config["RemoteConfig"]:
+            if env["platform"] == "android":
+                env.android_add_dependency("compile 'com.google.firebase:firebase-config:10.0.1'")
 
-		env.Append(LIBPATH=[firebase_sdk_libs])
-		env.Append(LIBS=['analytics', 'app'])
+            linkflags.append('remote_config')
 
-		env.android_add_maven_repository("url 'https://oss.sonatype.org/content/repositories/snapshots'")
+        if _config["Notification"]:
+            if env["platform"] == "android":
+                env.android_add_dependency("compile 'com.google.firebase:firebase-messaging:10.0.1'")
+                env.android_add_dependency("compile 'com.firebase:firebase-jobdispatcher:0.5.2'")
 
-		env.android_add_gradle_classpath("com.google.gms:google-services:3.0.0")
-		env.android_add_gradle_plugin("com.google.gms.google-services")
+            linkflags.append('messaging')
 
-		env.android_add_dependency("compile 'com.google.firebase:firebase-core:10.0.1'")
-		env.android_add_dependency("compile 'com.google.android.gms:play-services-base:10.0.1'")
+        if _config["Invites"]:
+            if env["platform"] == "android":
+                env.android_add_dependency("compile 'com.google.firebase:firebase-invites:10.0.1'")
 
-		env.android_add_dependency("compile 'commons-codec:commons-codec:1.10'")
+            linkflags.append('invites')
 
-		env.android_add_default_config("applicationId 'com.froglogics.dotsndots'")
+        if _config["Storage"]:
+            if env["platform"] == "android":
+                env.android_add_dependency("compile 'com.google.firebase:firebase-storage:10.0.1'")
 
-	elif env["platform"] == "iphone":
-		firebase_sdk_libs = ''
+            linkflags.append('storage')
 
-		if env["arch"] == "arm":
-			firebase_sdk_libs = '#modules/gdfirebase/firebase_cpp_sdk/libs/ios/i386'
-		elif env["arch"] == "arm64":
-			firebase_sdk_libs = '#modules/gdfirebase/firebase_cpp_sdk/libs/ios/arm64'
-		elif env["arch"] == "x86":
-			firebase_sdk_libs = '#modules/gdfirebase/firebase_cpp_sdk/libs/ios/x86_64'
-		else:
-			print("ERR: Arch not supported by godot..!");
-			return;
+    if env["platform"] == "android":
+        env.android_add_maven_repository("url 'https://oss.sonatype.org/content/repositories/snapshots'")
+        env.android_add_flat_dir("#modules/gdfirebase/firebase_cpp_sdk/libs/android/")
+        env.android_add_gradle_classpath("com.google.gms:google-services:3.0.0")
+        env.android_add_gradle_plugin("com.google.gms.google-services")
 
-		# Not tested (Need Help)
-		firebase_sdk_libs = '#modules/gdfirebase/firebase_cpp_sdk/libs/ios/arm64/lib'
+        env.android_add_dependency("compile 'com.google.firebase:firebase-core:10.0.1'")
+        env.android_add_dependency("compile 'com.google.android.gms:play-services-base:10.0.1'")
+        env.android_add_dependency("compile 'commons-codec:commons-codec:1.10'")
 
-		env.Append(LIBPATH=[firebase_sdk_libs])
-		env.Append(LIBS=['analytics', 'app'])
+        env.android_add_default_config("applicationId 'com.froglogics.dotsndots'")
 
-		env.Append(LINKFLAGS=['-ObjC', '-framework', 'Firebase'])
-		env.Append(FRAMEWORKPATH=['modules/gdfirebase/ios/lib'])
-		
-pass
+        ARCH = "armeabi" 
+        if env["android_arch"] == "armv7": ARCH = "armeabi-v7a"
+        elif env["android_arch"] == "x86": ARCH = "x86"
+        else:
+            print("ERR: Arch not supported by godot..!")
+            return
+
+        firebase_sdk_libs = '#modules/gdfirebase/firebase_cpp_sdk/libs/android/'+ ARCH +'/c++/'
+
+        env.Append(LIBPATH=[firebase_sdk_libs])
+        env.Append(LIBS=linkflags)
+    elif env["platform"] == "iphone":
+        ARCH = 'i386'
+        if env["arch"] == "arm64": ARCH = "arm64"
+        elif env["arch"] == "x86": ARCH = "x86_64"
+        else:
+            print("ERR: Arch not supported by godot..!")
+            return
+
+        firebase_sdk_libs = '#modules/gdfirebase/firebase_cpp_sdk/libs/ios/' + ARCH
+
+        # Not tested (Need Help)
+        env.Append(LIBPATH=[firebase_sdk_libs])
+        env.Append(LIBS=linkflags)
+
+        env.Append(LINKFLAGS=['-ObjC', '-framework', 'Firebase', '-framework', 'FirebaseAdmob'])
+        env.Append(FRAMEWORKPATH=['modules/gdfirebase/frameworks/ios/'+ARCH])

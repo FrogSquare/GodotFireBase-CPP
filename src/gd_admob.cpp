@@ -24,6 +24,7 @@
 NS_GODOT_BEGINE
 
 // A simple listener that logs changes to an ad view.
+#if GD_FIREBASE_ANDROID_IOS
 class LoggingAdViewListener : public firebase::admob::BannerView::Listener {
 public:
 	LoggingAdViewListener(GDAdMob *scene)
@@ -45,6 +46,7 @@ public:
 private:
 	GDAdMob *_scene;
 };
+#endif
 
 GDAdMob *GDAdMob::mInstance = nullptr;
 
@@ -60,44 +62,44 @@ GDAdMob *GDAdMob::getInstance() {
 }
 
 void GDAdMob::createBanner() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 }
 
 void GDAdMob::createInterstitial() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 }
 
 void GDAdMob::createRewardedVideo() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 }
 
 bool GDAdMob::isRewardedVideoLoaded() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 
 	return false;
 }
 
 void GDAdMob::showRewardedVideo() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 }
 
 void GDAdMob::showBannedAd() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 }
 
 void GDAdMob::showInterstitialAd() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 }
 
 void GDAdMob::onRewardedVideoStatusChanged(){
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #endif
 }
 

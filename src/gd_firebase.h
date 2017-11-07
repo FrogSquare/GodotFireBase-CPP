@@ -6,7 +6,7 @@
 #include "gd_config.h"
 #include "reference.h"
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 #include "firebase/analytics.h"
 #include "firebase/analytics/event_names.h"
 #include "firebase/analytics/parameter_names.h"
@@ -31,9 +31,6 @@ public:
 	void initWithFile(String filename);
 
 #if GD_FIREBASE_ANALYTICS
-	void initAnalytics();
-	void initRemoteConfig();
-
 	void setScreenName(String screen_name);
 	void sendAchievement(String a_id);
 	void join_group(String id);
@@ -48,8 +45,38 @@ public:
 	void send_custom(String key, String value);
 #endif
 
+#if GD_FIREBASE_ADMOB
+	void showBannerAd(bool show);
+	void showInterstitialAd();
+	void showRewardedVideo();
+	void requestRewardedVideoStatus();
+#endif
+
+#if GD_FIREBASE_NOTIFICATION
+	void notifyInMin(String p_message, int p_mins);
+	void subscribeToTopic(String p_topic);
+	void getToken();
+#endif
+
+#if GD_FIREBASE_INVITES
+	void invite(String p_message, String p_deep_link);
+#endif
+
+#if GD_FIREBASE_REMOTECONFIG
+	void getRemoteValue(String p_key);
+	void setRemoteDefaults(Dictionary p_dict);
+	void setRemoteDefaultsFile(String p_path);
+#endif
+
+#if GD_FIREBASE_STORAGE
+	void download(String p_file, String p_path);
+	void upload(String p_file, String p_path);
+#endif
+
 #ifdef ANDROID_ENABLED
-	void update_env(JNIEnv *p_env) { env = p_env; }
+	void update_env(JNIEnv *p_env) {
+		env = p_env;
+	}
 	jobject get_instance() const { return instance; }
 	void set_instance(jobject p_instance) { instance = p_instance; }
 
@@ -61,7 +88,7 @@ protected:
 	static void _bind_methods();
 
 private:
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	::firebase::App *app;
 #endif
 };

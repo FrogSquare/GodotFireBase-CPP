@@ -9,6 +9,8 @@
  * @contact http://frogsquare.com/
  **/
 
+#include "variant.h"
+
 #include <gd_remote_config.h>
 
 #ifdef ANDROID_ENABLED
@@ -33,7 +35,7 @@ GDRemoteConfig *GDRemoteConfig::getInstance() {
 	return mInstance;
 }
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 void GDRemoteConfig::init(firebase::App *app) {
 	this->_app = app;
 
@@ -43,13 +45,13 @@ void GDRemoteConfig::init(firebase::App *app) {
 #endif
 
 void GDRemoteConfig::setDefaultsFile(String filepath) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 //remote_config::ConfigSetting;
 #endif
 }
 
 void GDRemoteConfig::setDefaults(const Dictionary p_defaults) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	remote_config::ConfigKeyValueVariant *_defaults =
 			new remote_config::ConfigKeyValueVariant[p_defaults.size()];
 
@@ -67,7 +69,7 @@ void GDRemoteConfig::setDefaults(const Dictionary p_defaults) {
 }
 
 void GDRemoteConfig::fetchRemoteConfigs() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	const int cacheExpire = 3000;
 	remote_config::Fetch(cacheExpire)
 			.OnCompletion([](const firebase::Future<void> &call, void *user_data) {
@@ -84,7 +86,7 @@ void GDRemoteConfig::fetchRemoteConfigs() {
 
 Variant GDRemoteConfig::getValue(const String key, const String p_namespace) {
 	Variant ret;
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	const char *_key = (const char *)key.c_str();
 	const char *_namespace = (const char *)p_namespace.c_str();
 

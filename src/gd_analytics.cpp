@@ -25,7 +25,7 @@ GDAnalytics *GDAnalytics::mInstance = nullptr;
 GDAnalytics::GDAnalytics() {
 }
 
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 void GDAnalytics::init(::firebase::App *app) {
 	this->_app = app;
 	analytics::Initialize(*app);
@@ -47,7 +47,7 @@ GDAnalytics *GDAnalytics::getInstance() {
 }
 
 void GDAnalytics::set_screen_name(const char *screenName) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	//analytics::SetCurrentScreen(screenName, NULL);
 	analytics::LogEvent("current_screen", "screen_name", screenName);
 
@@ -56,7 +56,7 @@ void GDAnalytics::set_screen_name(const char *screenName) {
 }
 
 void GDAnalytics::send_achievement(const char *id) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::LogEvent(analytics::kEventUnlockAchievement, analytics::kParameterAchievementID, id);
 
 	LOGI("Sending:AchievementUnlock: %s", id);
@@ -64,7 +64,7 @@ void GDAnalytics::send_achievement(const char *id) {
 }
 
 void GDAnalytics::send_group(const char *group_id) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::LogEvent(analytics::kEventJoinGroup, analytics::kParameterGroupID, group_id);
 
 	LOGI("Sending:JoinGroup: %s", group_id);
@@ -72,7 +72,7 @@ void GDAnalytics::send_group(const char *group_id) {
 }
 
 void GDAnalytics::send_level_up(const char *character, int level) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::Parameter parameters[] = {
 		analytics::Parameter(analytics::kParameterCharacter, character),
 		analytics::Parameter(analytics::kParameterLevel, level),
@@ -85,7 +85,7 @@ void GDAnalytics::send_level_up(const char *character, int level) {
 }
 
 void GDAnalytics::send_score(const char *character, int level, int score) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::Parameter parameters[] = {
 		analytics::Parameter(analytics::kParameterCharacter, character),
 		analytics::Parameter(analytics::kParameterLevel, level),
@@ -98,11 +98,18 @@ void GDAnalytics::send_score(const char *character, int level, int score) {
 #endif
 }
 
+void GDAnalytics::send_content(const char *content_type, const char *item_id) {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
 void GDAnalytics::send_share() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
 }
 
 void GDAnalytics::earn_currency(const char *currency_name, int value) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::Parameter parameters[] = {
 		analytics::Parameter(analytics::kParameterVirtualCurrencyName, currency_name),
 		analytics::Parameter(analytics::kParameterValue, value),
@@ -115,7 +122,7 @@ void GDAnalytics::earn_currency(const char *currency_name, int value) {
 }
 
 void GDAnalytics::spend_currency(const char *item_name, const char *currency_name, int value) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::Parameter parameters[] = {
 		analytics::Parameter(analytics::kParameterItemName, item_name),
 		analytics::Parameter(analytics::kParameterVirtualCurrencyName, currency_name),
@@ -129,7 +136,7 @@ void GDAnalytics::spend_currency(const char *item_name, const char *currency_nam
 }
 
 void GDAnalytics::send_tutorial_begin() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::LogEvent(analytics::kEventTutorialBegin);
 
 	LOGI("Sending:Tutorial:Begin");
@@ -137,7 +144,7 @@ void GDAnalytics::send_tutorial_begin() {
 }
 
 void GDAnalytics::send_tutorial_complete() {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::LogEvent(analytics::kEventTutorialComplete);
 
 	LOGI("Sending:Tutorial:Complete");
@@ -149,7 +156,7 @@ void GDAnalytics::send_events(const char *eventName, Dictionary keyValues) {
 }
 
 void GDAnalytics::send_custom(const char *key, const char *value) {
-#ifdef GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS
 	analytics::LogEvent("appEvent", key, value);
 
 	LOGI("Sending:App:Event: {%s:%s}", key, value);
