@@ -17,7 +17,8 @@
 #ifndef GD_ANALYTICS_H
 #define GD_ANALYTICS_H
 
-#include "gd_config.h"
+#include "utils.h"
+
 #include "reference.h"
 
 #if GD_FIREBASE_ANALYTICS

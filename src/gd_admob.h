@@ -17,34 +17,21 @@
 #ifndef GD_ADMOB_H
 #define GD_ADMOB_H
 
-#include "gd_config.h"
 #include "reference.h"
+#include "utils.h"
 
 #ifdef GD_FIREBASE_ADMOB
 
 #if GD_FIREBASE_ANDROID_IOS
 #include "firebase/admob.h"
 #include "firebase/app.h"
+
+namespace admob = ::firebase::admob;
 #endif
 
 NS_GODOT_BEGINE
 
-#if GD_FIREBASE_ANDROID_IOS
-const char *k_AdMobAppID = "ca-app-pub-3940256099942544~3347511713";
-#else
-const char *k_AdMobAppID = "";
-#endif
-
-// These ad units are configured to always serve test ads.
-#if GD_FIREBASE_ANDROID_IOS
-const char *k_AdViewAdUnit = "ca-app-pub-3940256099942544/6300978111";
-const char *k_InterstitialAdUnit = "ca-app-pub-3940256099942544/1033173712";
-const char *k_RewardedVideoAdUnit = "ca-app-pub-3940256099942544/2888167318";
-#else
-const char *k_AdViewAdUnit = "";
-const char *k_InterstitialAdUnit = "";
-const char *k_RewardedVideoAdUnit = "";
-#endif
+class LoggingAdViewListener;
 
 // The ad view's ad size.
 static const int k_AdViewWidth = 320;
@@ -68,6 +55,11 @@ class GDAdMob {
 public:
 	GDAdMob();
 
+#if GD_FIREBASE_ANDROID_IOS
+	void init(::firebase::App *app);
+	admob::AdRequest createAdRequest();
+#endif
+
 	void createBanner();
 	void createInterstitial();
 	void createRewardedVideo();
@@ -75,18 +67,31 @@ public:
 	bool isRewardedVideoLoaded();
 
 	void showRewardedVideo();
-	void showBannedAd();
+	void showBannedAd(bool p_show);
 	void showInterstitialAd();
 
 	void onRewardedVideoStatusChanged();
 
+	void onAdViewInitialized();
+
 	static GDAdMob *getInstance();
 
 private:
+#if GD_FIREBASE_ANDROID_IOS
+	::firebase::App *_app;
+	::firebase::admob::BannerView *_ad_view;
+#endif
 	static GDAdMob *mInstance;
 
 	bool interstitialAdShown = false;
 	bool rewardedVideoAdShown = false;
+
+	LoggingAdViewListener *_adview_listener;
+
+	const char *k_AdMobAppID;
+	const char *k_AdViewAdUnit;
+	const char *k_InterstitialAdUnit;
+	const char *k_RewardedVideoAdUnit;
 };
 
 NS_GODOT_END

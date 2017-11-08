@@ -3,7 +3,8 @@
 #ifndef __GD_FIREBASE_H__
 #define __GD_FIREBASE_H__
 
-#include "gd_config.h"
+#include "utils.h"
+
 #include "reference.h"
 
 #if GD_FIREBASE_ANDROID_IOS
@@ -27,8 +28,8 @@ public:
 	GDFireBase();
 
 	void initFireBase();
-	void init(String data, int script_id);
-	void initWithFile(String filename);
+	void init(Dictionary p_data, int p_script_id);
+	void initWithFile(String filename, int p_script_id);
 
 #if GD_FIREBASE_ANALYTICS
 	void setScreenName(String screen_name);
@@ -91,6 +92,8 @@ private:
 #if GD_FIREBASE_ANDROID_IOS
 	::firebase::App *app;
 #endif
+
+	Dictionary _config;
 };
 
 NS_GODOT_END

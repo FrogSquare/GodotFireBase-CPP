@@ -49,6 +49,16 @@ public:
 	static JNIEnv *getEnv();
 	static jobject getActivity();
 
+	inline static void setLayout(jobject obj) {
+		JNIHelper::_layout = obj;
+	}
+
+	inline static jobject getLayout() {
+		return JNIHelper::_layout;
+	}
+
+	static jobject getField(jclass cls, jobject p_obj, std::string p_field);
+
 	static bool setClassLoaderFrom(jobject activityInstance);
 	static bool getStaticMethodInfo(
 			JniMethodInfo &methodInfo, const char *className, const char *methodName, const char *paramCode);
@@ -87,6 +97,7 @@ private:
 
 	static JavaVM *_psJavaVM;
 	static jobject _activity;
+	static jobject _layout;
 
 	static jstring convert(JniMethodInfo &t, Variant x);
 

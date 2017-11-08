@@ -7,6 +7,7 @@
 
 #ifdef ANDROID_ENABLED
 #include "jnihelper.h"
+#include <assert.h>
 
 USING_NS_GODOT;
 
@@ -26,6 +27,7 @@ extern "C" int common_main() {
 	} else {
 		GDFireBase::instance = env->CallStaticObjectMethod(cls, getIns);
 		JNIHelper::setClassLoaderFrom(GDFireBase::instance);
+		JNIHelper::setLayout(JNIHelper::getField(cls, GDFireBase::instance, "layout"));
 		return 1;
 	}
 

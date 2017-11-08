@@ -77,6 +77,7 @@ jmethodID JNIHelper::loadclassMethod_methodID = nullptr;
 jobject JNIHelper::classLoader = nullptr;
 std::function<void()> JNIHelper::classloaderCallback = nullptr;
 
+jobject JNIHelper::_layout = nullptr;
 jobject JNIHelper::_activity = nullptr;
 std::unordered_map<JNIEnv *, std::vector<jobject> > JNIHelper::localRefs;
 
@@ -92,6 +93,20 @@ void JNIHelper::setJavaVM(JavaVM *javaVM) {
 	_psJavaVM = javaVM;
 
 	pthread_key_create(&g_key, _detachCurrentThread);
+}
+
+jobject JNIHelper::getField(jclass cls, jobject p_obj, std::string p_fieldname) {
+	JNIEnv *env = JNIHelper::getEnv();
+
+	jfieldID layout_fid = env->GetFieldID(cls, p_fieldname.c_str(), "Landroid/widget/FrameLayout;");
+	if (layout_fid == NULL || env->ExceptionCheck())
+		throw std::string("bummer getting field '") + p_fieldname + "' \n";
+
+	jobject field = env->GetObjectField(JNIHelper::getActivity(), layout_fid);
+	if (field == NULL || env->ExceptionCheck())
+		throw std::string("bummer getting FiledObject '") + p_fieldname + "' \n";
+
+	return field;
 }
 
 JNIEnv *JNIHelper::cacheEnv(JavaVM *jvm) {

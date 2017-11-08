@@ -1,8 +1,10 @@
 /** firebase.h **/
 
-#include "gd_firebase.h"
+#include "utils.h"
+
 #include "gd_admob.h"
 #include "gd_analytics.h"
+#include "gd_firebase.h"
 #include "gd_remote_config.h"
 
 #ifdef ANDROID_ENABLED
@@ -41,19 +43,32 @@ void GDFireBase::initFireBase() {
 #endif
 
 	GDAnalytics::getInstance()->init(this->app);
+	GDAdMob::getInstance()->init(this->app);
 	GDRemoteConfig::getInstance()->init(this->app);
 #endif
 }
 
-void GDFireBase::initWithFile(String filename) {
+void GDFireBase::initWithFile(String p_filename, int p_script_id) {
 #if GD_FIREBASE_ANDROID_IOS
+
+	Error err = Utils::parse_file_dict(p_filename, _config);
+	if (err != OK) {
+		ERR_FAIL_COND(err != OK);
+	}
+
 	initFireBase();
+
+	Utils::set_script_id(p_script_id);
 #endif
 }
 
-void GDFireBase::init(String data, int script_id) {
+void GDFireBase::init(Dictionary p_data, int p_script_id) {
 #if GD_FIREBASE_ANDROID_IOS
+	_config = p_data;
+
 	initFireBase();
+
+	Utils::set_script_id(p_script_id);
 #endif
 }
 
@@ -135,16 +150,19 @@ void GDFireBase::send_custom(String key, String value) {
 #if GD_FIREBASE_ADMOB
 void GDFireBase::showBannerAd(bool show) {
 #if GD_FIREBASE_ANDROID_IOS
+	GDAdMob::getInstance()->showBannedAd(show);
 #endif
 }
 
 void GDFireBase::showInterstitialAd() {
 #if GD_FIREBASE_ANDROID_IOS
+	GDAdMob::getInstance()->showInterstitialAd();
 #endif
 }
 
 void GDFireBase::showRewardedVideo() {
 #if GD_FIREBASE_ANDROID_IOS
+	GDAdMob::getInstance()->showRewardedVideo();
 #endif
 }
 

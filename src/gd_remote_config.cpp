@@ -9,9 +9,11 @@
  * @contact http://frogsquare.com/
  **/
 
+#include "gd_remote_config.h"
+#include "io/json.h"
 #include "variant.h"
 
-#include <gd_remote_config.h>
+#include "utils.h"
 
 #ifdef ANDROID_ENABLED
 #ifdef GD_FIREBASE_DEBUG
@@ -44,9 +46,17 @@ void GDRemoteConfig::init(firebase::App *app) {
 }
 #endif
 
-void GDRemoteConfig::setDefaultsFile(String filepath) {
+void GDRemoteConfig::setDefaultsFile(String p_filepath) {
 #if GD_FIREBASE_ANDROID_IOS
-//remote_config::ConfigSetting;
+	//remote_config::ConfigSetting;
+	Dictionary l_dict = Dictionary();
+
+	Error err = Utils::parse_file_dict(p_filepath, l_dict);
+	if (err != OK) {
+		ERR_FAIL_COND(err != OK);
+	}
+
+	GDRemoteConfig::setDefaults(l_dict);
 #endif
 }
 

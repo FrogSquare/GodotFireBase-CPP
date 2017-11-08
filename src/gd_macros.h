@@ -2,12 +2,14 @@
 #ifndef __GD_FIREBASE_MACROS_H__
 #define __GD_FIREBASE_MACROS_H__
 
-#define NS_GODOT_BEGINE		namespace godot {
-#define NS_GODOT_END		};
+#define NS_GODOT_BEGINE namespace godot {
+#define NS_GODOT_END \
+	}                \
+	;
 
-#define USING_NS_GODOT		using namespace godot;
+#define USING_NS_GODOT using namespace godot;
 
-#define GD_FIREBASE_ANDROID_IOS	1
+#define GD_FIREBASE_ANDROID_IOS 1
 
 #ifdef ANDROID_ENABLED
 #include <android/log.h>
@@ -25,5 +27,7 @@
 #undef GD_FIREBASE_ANDROID_IOS
 #define GD_FIREBASE_ANDROID_IOS 0
 #endif
+
+//#define GD_FIREBASE_ANDROID_IOS 1
 
 #endif // __GD_FIREBASE_MACROS_H__

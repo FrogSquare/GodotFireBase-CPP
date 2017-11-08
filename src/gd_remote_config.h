@@ -12,9 +12,8 @@
 #ifndef GD_REMOTE_CONFIG_H
 #define GD_REMOTE_CONFIG_H
 
-#include <dictionary.h>
-#include <gd_config.h>
-#include <gd_macros.h>
+#include "utils.h"
+
 #include <ustring.h>
 
 #if GD_FIREBASE_REMOTECONFIG
