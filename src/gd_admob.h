@@ -26,12 +26,18 @@
 #include "firebase/admob.h"
 #include "firebase/app.h"
 
+#include "firebase/admob/banner_view.h"
+#include "firebase/admob/interstitial_ad.h"
+#include "firebase/admob/rewarded_video.h"
+
 namespace admob = ::firebase::admob;
 #endif
 
 NS_GODOT_BEGINE
 
 class LoggingAdViewListener;
+class LoggingInterstitialAdListener;
+class LoggingRewardedVideoListener;
 
 // The ad view's ad size.
 static const int k_AdViewWidth = 320;
@@ -73,6 +79,7 @@ public:
 	void onRewardedVideoStatusChanged();
 
 	void onAdViewInitialized();
+	void onInterstitialInitialized();
 
 	static GDAdMob *getInstance();
 
@@ -80,6 +87,7 @@ private:
 #if GD_FIREBASE_ANDROID_IOS
 	::firebase::App *_app;
 	::firebase::admob::BannerView *_ad_view;
+	::firebase::admob::InterstitialAd *_interstitialAd;
 #endif
 	static GDAdMob *mInstance;
 
@@ -87,6 +95,8 @@ private:
 	bool rewardedVideoAdShown = false;
 
 	LoggingAdViewListener *_adview_listener;
+	LoggingInterstitialAdListener *_interstitial_listener;
+	LoggingRewardedVideoListener *_rewarded_ad_listener;
 
 	const char *k_AdMobAppID;
 	const char *k_AdViewAdUnit;

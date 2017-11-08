@@ -28,6 +28,6 @@
 #define GD_FIREBASE_ANDROID_IOS 0
 #endif
 
-//#define GD_FIREBASE_ANDROID_IOS 1
+#define GD_FIREBASE_ANDROID_IOS 1
 
 #endif // __GD_FIREBASE_MACROS_H__

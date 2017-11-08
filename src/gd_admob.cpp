@@ -23,7 +23,7 @@ NS_GODOT_BEGINE
 #if GD_FIREBASE_ANDROID_IOS
 
 /// A simple listener that logs changes to an ad view.
-class LoggingAdViewListener : public firebase::admob::BannerView::Listener {
+class LoggingAdViewListener : public admob::BannerView::Listener {
 public:
 	LoggingAdViewListener(GDAdMob *scene)
 		: scene(scene) {}
@@ -36,6 +36,39 @@ public:
 			firebase::admob::BoundingBox box) override {
 		LOGI("The ad view's BoundingBox has changed to (x: %d, y: %d, width: %d, height %d).",
 				box.x, box.y, box.width, box.height);
+	}
+
+private:
+	GDAdMob *scene;
+};
+
+/// A simple listener that logs changes to an InterstitialAd.
+class LoggingInterstitialAdListener : public admob::InterstitialAd::Listener {
+public:
+	LoggingInterstitialAdListener(GDAdMob *scene)
+		: scene(scene) {}
+	void OnPresentationStateChanged(
+			firebase::admob::InterstitialAd *interstitialAd,
+			firebase::admob::InterstitialAd::PresentationState state) override {
+		LOGI("InterstitialAd PresentationState has changed to %d.", state);
+	}
+
+private:
+	GDAdMob *scene;
+};
+
+/// A simple listener that logs changes to rewarded video state.
+class LoggingRewardedVideoListener : public admob::rewarded_video::Listener {
+public:
+	LoggingRewardedVideoListener(GDAdMob *scene)
+		: scene(scene) {}
+	void OnRewarded(admob::rewarded_video::RewardItem reward) override {
+		LOGI("Rewarding user with %f %s.", reward.amount, reward.reward_type.c_str());
+	}
+
+	void OnPresentationStateChanged(admob::rewarded_video::PresentationState state) override {
+
+		LOGI("Rewarded video PresentationState has changed to %d.", state);
 	}
 
 private:
@@ -65,6 +98,60 @@ static void onAdViewLoadAdCompletionCallback(const firebase::Future<void> &futur
 	}
 }
 
+/// This function is called when the Future for the last call to the
+/// InterstitialAds's Initialize() method completes.
+static void onInterstitialAdInitializeCompletionCallback(const firebase::Future<void> &future, void *userData) {
+
+	GDAdMob *scene = static_cast<GDAdMob *>(userData);
+	if (future.error() == firebase::admob::kAdMobErrorNone) {
+		LOGI("Initializing the interstitial ad completed successfully.");
+		scene->onInterstitialInitialized();
+	} else {
+		LOGI("Initializing the interstitial ad failed.");
+		LOGI("ERROR: Action failed with error code %d and message \"%s\".",
+				future.error(), future.error_message());
+	}
+}
+
+static void onInterstitialAdLoadAdCompletionCallback(const firebase::Future<void> &future, void *userData) {
+
+	GDAdMob *scene = static_cast<GDAdMob *>(userData);
+	if (future.error() == firebase::admob::kAdMobErrorNone) {
+		LOGI("Loading the interstitial ad completed successfully.");
+	} else {
+		LOGI("Loading the interstitial ad failed.");
+		LOGI("ERROR: Action failed with error code %d and message \"%s\".",
+				future.error(), future.error_message());
+	}
+}
+
+static void onRewardedVideoInitializeCompletionCallback(const firebase::Future<void> &future, void *userData) {
+	GDAdMob *scene = static_cast<GDAdMob *>(userData);
+	if (future.error() == firebase::admob::kAdMobErrorNone) {
+		LOGI("Initializing rewarded video completed successfully.");
+	} else {
+		LOGI("Initializing rewarded video failed.");
+		LOGI("ERROR: Action failed with error code %d and message \"%s\".",
+				future.error(), future.error_message());
+	}
+}
+
+static void onRewardedVideoLoadAdCompletionCallback(const firebase::Future<void> &future, void *userData) {
+
+	GDAdMob *scene = static_cast<GDAdMob *>(userData);
+	if (future.error() == firebase::admob::kAdMobErrorNone) {
+		LOGI("Loading rewarded video completed successfully.");
+	} else {
+		LOGI("Loading rewarded video failed.");
+		LOGI("ERROR: Action failed with error code %d and message \"%s\".",
+				future.error(), future.error_message());
+
+		// Rewarded Video returned an error. This might be because the developer did
+		// not put their Rewarded Video ad unit into kRewardedVideoAdUnit above.
+		LOGI("WARNING: Is your Rewarded Video ad unit ID correct?");
+		LOGI("Ensure kRewardedVideoAdUnit is set to your own Rewarded Video ad unit ID.");
+	}
+}
 #endif
 
 GDAdMob *GDAdMob::mInstance = nullptr;
@@ -91,7 +178,11 @@ void GDAdMob::init(::firebase::App *app) {
 	admob::Initialize(*_app, k_AdMobAppID);
 
 	_adview_listener = new LoggingAdViewListener(this);
+	_interstitial_listener = new LoggingInterstitialAdListener(this);
+	_rewarded_ad_listener = new LoggingRewardedVideoListener(this);
+
 	_ad_view = new admob::BannerView();
+	_interstitialAd = new admob::InterstitialAd();
 
 	admob::AdSize adSize;
 	adSize.ad_size_type = admob::kAdSizeStandard;
@@ -99,16 +190,29 @@ void GDAdMob::init(::firebase::App *app) {
 	adSize.height = k_AdViewHeight;
 
 #ifdef ANDROID_ENABLED
-	_ad_view->Initialize(JNIHelper::getLayout(), k_AdViewAdUnit, adSize);
+	admob::AdParent parent = static_cast<admob::AdParent>(JNIHelper::getLayout());
+
+	_ad_view->Initialize(parent, k_AdViewAdUnit, adSize);
+	_interstitialAd->Initialize(JNIHelper::getActivity(), k_InterstitialAdUnit);
 #endif
 
 	/**
-	#ifdef IPHONE_ENABLED
+#ifdef IPHONE_ENABLED
 	_ad_view->Initialize({Get Root Control View Here}, k_AdViewAdUnit, adSize);
-	#endif
+	_interstitialAd->Initialize({Get Root Control View Here}, k_InterstitialAdUnit);
+#endif
 	**/
 
 	_ad_view->InitializeLastResult().OnCompletion(onAdViewInitializeCompletionCallback, this);
+	_interstitialAd->InitializeLastResult().OnCompletion(
+			onInterstitialAdInitializeCompletionCallback, this);
+
+	/**
+	admob::rewarded_video::Destroy();
+	admob::rewarded_video::Initialize();
+	admob::rewarded_video::InitializeLastResult()
+			.OnCompletion(onRewardedVideoInitializeCompletionCallback, this);
+	**/
 }
 
 admob::AdRequest GDAdMob::createAdRequest() {
@@ -174,6 +278,25 @@ void GDAdMob::onAdViewInitialized() {
 #endif
 }
 
+void GDAdMob::onInterstitialInitialized() {
+#if GD_FIREBASE_ANDROID_IOS
+	if (_interstitialAd->InitializeLastResult().status() == firebase::kFutureStatusComplete &&
+			_interstitialAd->InitializeLastResult().error() == firebase::admob::kAdMobErrorNone) {
+
+		LOGI("Setting the InterstitialAd listener.");
+
+		_interstitialAd->SetListener(_interstitial_listener);
+
+		LOGI("Loading the interstitial ad.");
+
+		admob::AdRequest ad_request = {};
+		_interstitialAd->LoadAd(ad_request);
+		_interstitialAd->LoadAdLastResult().OnCompletion(
+				onInterstitialAdLoadAdCompletionCallback, this);
+	}
+#endif
+}
+
 void GDAdMob::createBanner() {
 #if GD_FIREBASE_ANDROID_IOS
 #endif
@@ -218,6 +341,11 @@ void GDAdMob::showBannedAd(bool p_show) {
 
 void GDAdMob::showInterstitialAd() {
 #if GD_FIREBASE_ANDROID_IOS
+	if (_interstitialAd->InitializeLastResult().status() == firebase::kFutureStatusComplete &&
+			_interstitialAd->InitializeLastResult().error() == firebase::admob::kAdMobErrorNone) {
+
+		_interstitialAd->Show();
+	}
 #endif
 }
 
