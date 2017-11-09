@@ -1,4 +1,6 @@
 
+import os
+
 # Update this to customize the module
 _config = {
 "Analytics"      : True,
@@ -22,6 +24,8 @@ def can_build(plat):
     return (plat == "android" or plat == "x11" or plat == "iphone")
 
 def configure(env):
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+
     if env["platform"] == "android" or env["platform"] == "iphone":
         if _config["AdMob"]:
             if env["platform"] == "android":
@@ -38,6 +42,7 @@ def configure(env):
         if _config["Notification"]:
             if env["platform"] == "android":
                 env.android_add_dependency("compile 'com.google.firebase:firebase-messaging:10.0.1'")
+                env.android_add_dependency("compile 'com.google.firebase.messaging.cpp:firebase_messaging_cpp@aar'")
                 env.android_add_dependency("compile 'com.firebase:firebase-jobdispatcher:0.5.2'")
 
             linkflags.append('messaging')
@@ -55,8 +60,10 @@ def configure(env):
             linkflags.append('storage')
 
     if env["platform"] == "android":
+        env.android_add_maven_repository("url 'https://maven.google.com'")
         env.android_add_maven_repository("url 'https://oss.sonatype.org/content/repositories/snapshots'")
-        env.android_add_flat_dir("#modules/gdfirebase/firebase_cpp_sdk/libs/android/")
+
+        env.android_add_flat_dir(cur_dir + "/firebase_cpp_sdk/libs/android")
         env.android_add_gradle_classpath("com.google.gms:google-services:3.0.0")
         env.android_add_gradle_plugin("com.google.gms.google-services")
 

@@ -5,6 +5,7 @@
 #include "gd_admob.h"
 #include "gd_analytics.h"
 #include "gd_firebase.h"
+#include "gd_notification.h"
 #include "gd_remote_config.h"
 
 #ifdef ANDROID_ENABLED
@@ -45,6 +46,7 @@ void GDFireBase::initFireBase() {
 	GDAnalytics::getInstance()->init(this->app);
 	GDAdMob::getInstance()->init(this->app);
 	GDRemoteConfig::getInstance()->init(this->app);
+	GDNotification::getInstance()->init(this->app);
 #endif
 }
 
@@ -175,17 +177,21 @@ void GDFireBase::requestRewardedVideoStatus() {
 #if GD_FIREBASE_NOTIFICATION
 void GDFireBase::notifyInMin(String p_message, int p_mins) {
 #if GD_FIREBASE_ANDROID_IOS
+	GDNotification::getInstance()->notifyInMin(p_message, p_mins);
 #endif
 }
 
 void GDFireBase::subscribeToTopic(String p_topic) {
 #if GD_FIREBASE_ANDROID_IOS
+	GDNotification::getInstance()->subscribeToTopic(p_topic);
 #endif
 }
 
-void GDFireBase::getToken() {
+String GDFireBase::getToken() {
 #if GD_FIREBASE_ANDROID_IOS
+	return GDNotification::getInstance()->getToken();
 #endif
+	return "";
 }
 #endif
 

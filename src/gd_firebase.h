@@ -56,7 +56,7 @@ public:
 #if GD_FIREBASE_NOTIFICATION
 	void notifyInMin(String p_message, int p_mins);
 	void subscribeToTopic(String p_topic);
-	void getToken();
+	String getToken();
 #endif
 
 #if GD_FIREBASE_INVITES
