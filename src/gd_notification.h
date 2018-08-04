@@ -36,8 +36,16 @@ public:
 	void init(::firebase::App *p_app);
 #endif
 
+    void cancel_notification(String tag);
 	void notifyInMin(String p_message, int p_mins);
 	void subscribeToTopic(String p_topic);
+
+    void shedule(Dictionary data, int seconds);
+    void notifyOnComplete(Dictionary data, int seconds);
+	void notifyInSecs(String p_message, int p_seconds);
+
+    //void dispatch_single_job();
+
 	String getToken();
 
 	inline void setToken(const char *p_tok) { this->_token = p_tok; }

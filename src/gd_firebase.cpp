@@ -5,6 +5,8 @@
 #include "gd_admob.h"
 #include "gd_analytics.h"
 #include "gd_firebase.h"
+#include "gd_firestore.h"
+#include "gd_invite.h"
 #include "gd_notification.h"
 #include "gd_remote_config.h"
 
@@ -28,9 +30,6 @@ GDFireBase::GDFireBase() {
 #if GD_FIREBASE_DEBUG
 	prctl(PR_SET_DUMPABLE, 1);
 #endif
-
-	initFireBase();
-
 #endif
 }
 
@@ -39,14 +38,39 @@ void GDFireBase::initFireBase() {
 #ifdef ANDROID_ENABLED
 	LOGI("Firebase:Initializing");
 	this->app = ::firebase::App::Create(JNIHelper::getEnv(), JNIHelper::getActivity());
+	LOGI("Firebase:App:Created");
 #else
 	this->app = ::firebase::App::Create();
 #endif
 
 	GDAnalytics::getInstance()->init(this->app);
-	GDAdMob::getInstance()->init(this->app);
-	GDRemoteConfig::getInstance()->init(this->app);
-	GDNotification::getInstance()->init(this->app);
+
+    if (_config["AdMob"]) {
+    	GDAdMob::getInstance()->init(this->app, _config["Ads"]);
+    }
+    else if (_config["Authentication"]) {
+        //GDAuthentication::getInstance()->init(this->app, _config["AuthConf"]);
+    }
+    else if (_config["Invites"]) {
+#if GD_FIREBASE_INVITES
+        GDInvite::getInstance()->init(this->app);
+#endif
+    }
+    else if (_config["RemoteConfig"]) {
+    	GDRemoteConfig::getInstance()->init(this->app);
+    }
+    else if (_config["Notification"]) {
+    	GDNotification::getInstance()->init(this->app);
+    }
+    else if (_config["Storage"]) {
+        //GDStorage::getInstance()->init(this->app);
+    }
+    else if (_config["Firestore"]) {
+        add_child(GDFirestore::getInstance());
+
+        GDFirestore::getInstance()->init(this->app);
+    }
+
 #endif
 }
 
@@ -195,12 +219,11 @@ String GDFireBase::getToken() {
 }
 #endif
 
-#if GD_FIREBASE_INVITES
 void GDFireBase::invite(String p_message, String p_deep_link) {
-#if GD_FIREBASE_ANDROID_IOS
+#if GD_FIREBASE_ANDROID_IOS && GD_FIREBASE_INVITES
+	GDInvite::getInstance()->invite(p_message);
 #endif
 }
-#endif
 
 #if GD_FIREBASE_REMOTECONFIG
 void GDFireBase::getRemoteValue(String p_key) {
@@ -234,6 +257,114 @@ void GDFireBase::upload(String p_file, String p_path) {
 }
 #endif
 
+#if GD_FIREBASE_AUTHENTICATION
+
+#if GD_AUTH_GOOGLE
+void GDFireBase::googleSignIn() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::googleSignOut() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+bool GDFireBase::isGoogleConnected() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+	return false;
+}
+
+void GDFireBase::getGoogleUser() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::googleRevokeAccess() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+#endif
+
+#if GD_AUTH_TWITTER
+void GDFireBase::twitterSignIn() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::twitterSignOut() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+bool GDFireBase::isTwitterConnected() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+	return false;
+}
+#endif
+
+#if GD_AUTH_FACEBOOK
+void GDFireBase::facebookSignIn() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::facebookSignOut() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+bool GDFireBase::isFacebookConnected() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+	return false;
+}
+
+void GDFireBase::getFacebookPermissions() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+bool GDFireBase::facebookHasPermission() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+	return false;
+}
+
+void GDFireBase::revokeFacebookPermision() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::facebookRevokeAccess() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::askFacebookReadPermission() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::askFacebookPublishPermission() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+
+void GDFireBase::getFacebookUser() {
+#if GD_FIREBASE_ANDROID_IOS
+#endif
+}
+#endif
+#endif
+
+
+void GDFireBase::load_document(String p_col_name, String p_doc_name, int callback_id) {
+    GDFirestore::getInstance()->load_document(p_col_name, p_doc_name, callback_id);
+}
+
 void GDFireBase::_bind_methods() {
 	ObjectTypeDB::bind_method("init", &GDFireBase::init);
 	ObjectTypeDB::bind_method("init_with_file", &GDFireBase::initWithFile);
@@ -260,30 +391,37 @@ void GDFireBase::_bind_methods() {
 	ObjectTypeDB::bind_method("download", &GDFireBase::download);
 	ObjectTypeDB::bind_method("upload", &GDFireBase::upload);
 
+	//Auth Google
+	ObjectTypeDB::bind_method("google_sign_in", &GDFireBase::googleSignIn);
+	ObjectTypeDB::bind_method("google_sign_out", &GDFireBase::googleSignOut);
+	ObjectTypeDB::bind_method("is_google_connected", &GDFireBase::isGoogleConnected);
+	ObjectTypeDB::bind_method("get_google_user", &GDFireBase::getGoogleUser);
+	ObjectTypeDB::bind_method("google_revoke_access", &GDFireBase::googleRevokeAccess);
+
+	//Auth Twitter
+	ObjectTypeDB::bind_method("twitter_sign_in", &GDFireBase::twitterSignIn);
+	ObjectTypeDB::bind_method("twitter_sign_out", &GDFireBase::twitterSignOut);
+	ObjectTypeDB::bind_method("is_twitter_connected", &GDFireBase::isTwitterConnected);
+
+	//Auth Facebook
+	ObjectTypeDB::bind_method("facebook_sign_in", &GDFireBase::facebookSignIn);
+	ObjectTypeDB::bind_method("facebook_sign_out", &GDFireBase::facebookSignOut);
+	ObjectTypeDB::bind_method("is_facebook_connected", &GDFireBase::isFacebookConnected);
+	ObjectTypeDB::bind_method("get_facebook_permissions", &GDFireBase::getFacebookPermissions);
+	ObjectTypeDB::bind_method("facebook_has_permission", &GDFireBase::facebookHasPermission);
+	ObjectTypeDB::bind_method("revoke_facebook_permission", &GDFireBase::revokeFacebookPermision);
+	ObjectTypeDB::bind_method("facebook_revoke_access", &GDFireBase::facebookRevokeAccess);
+	ObjectTypeDB::bind_method("ask_facebook_read_permission", &GDFireBase::askFacebookReadPermission);
+	ObjectTypeDB::bind_method("ask_facebook_publish_permission", &GDFireBase::askFacebookPublishPermission);
+	ObjectTypeDB::bind_method("get_facebook_user", &GDFireBase::getFacebookUser);
+
 //ObjectTypeDB::bind_method("", &GDFireBase::);
 
 /**
-                        //Auth++
-                        //AuthGoogle++
-                        "google_sign_in", "google_sign_out",
-                        "is_google_connected", "get_google_user",  "google_revoke_access",
-                        //AuthGoogle--
-
-                        //AuthFacebook++
-                        "facebook_sign_out", "facebook_sign_in", "is_facebook_connected",
-                        "get_facebook_permissions", "facebook_has_permission",
-                        "revoke_facebook_permission", "facebook_revoke_access",
-                        "ask_facebook_read_permission", "ask_facebook_publish_permission",
-                        "get_facebook_user",
-                        //AuthFacebook--
-
-                        //AuthTwitter++
-                        "twitter_sign_in", "twitter_sign_out", "is_twitter_connected",
-                        //AuthTwitter--
-
-                        "anonymous_sign_in", "anonymous_sign_out", "is_anonymous_connected",
-                        "authConfig",
-                        //Auth--
+	//Auth++
+	"anonymous_sign_in", "anonymous_sign_out", "is_anonymous_connected",
+	"authConfig",
+	//Auth--
 
 **/
 
@@ -302,6 +440,10 @@ void GDFireBase::_bind_methods() {
 	ObjectTypeDB::bind_method("tutorial_complete", &GDFireBase::tutorial_complete);
 	ObjectTypeDB::bind_method("send_events", &GDFireBase::send_events);
 	ObjectTypeDB::bind_method("send_custom", &GDFireBase::send_custom);
+
+	BIND_CONSTANT(GDAnalytics::Params::ACHIEVEMENT_ID);
+	BIND_CONSTANT(GDAnalytics::Params::ACLID);
+	BIND_CONSTANT(GDAnalytics::Params::AFFILIATION);
 #endif
 	//	ObjectTypeDB::bind_method("getValue", );
 }

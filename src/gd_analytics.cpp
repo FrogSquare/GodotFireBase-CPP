@@ -30,11 +30,11 @@ void GDAnalytics::init(::firebase::App *app) {
 	this->_app = app;
 	analytics::Initialize(*app);
 
-	LOGI("Initialized:FireBase");
-
 	analytics::SetAnalyticsCollectionEnabled(true);
 	analytics::SetMinimumSessionDuration(1000);
 	analytics::SetSessionTimeoutDuration(5000);
+
+	LOGI("Initialized:Analytics");
 }
 #endif
 

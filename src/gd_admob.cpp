@@ -129,6 +129,7 @@ static void onRewardedVideoInitializeCompletionCallback(const firebase::Future<v
 	GDAdMob *scene = static_cast<GDAdMob *>(userData);
 	if (future.error() == firebase::admob::kAdMobErrorNone) {
 		LOGI("Initializing rewarded video completed successfully.");
+		scene->onRewardedVideoInitialized();
 	} else {
 		LOGI("Initializing rewarded video failed.");
 		LOGI("ERROR: Action failed with error code %d and message \"%s\".",
@@ -163,6 +164,12 @@ GDAdMob::GDAdMob() {
 	k_RewardedVideoAdUnit = "ca-app-pub-3940256099942544/2888167318";
 }
 
+GDAdMob::~GDAdMob() {
+#if GD_FIREBASE_ANDROID_IOS
+	admob::rewarded_video::Destroy();
+#endif
+}
+
 GDAdMob *GDAdMob::getInstance() {
 	if (mInstance == nullptr) {
 		mInstance = memnew(GDAdMob);
@@ -172,14 +179,21 @@ GDAdMob *GDAdMob::getInstance() {
 }
 
 #if GD_FIREBASE_ANDROID_IOS
-void GDAdMob::init(::firebase::App *app) {
+void GDAdMob::init(::firebase::App *app, Dictionary p_config) {
 	this->_app = app;
+
+	k_AdMobAppID = p_config["AppId"].operator String().utf8();
+	k_AdViewAdUnit = p_config["BannerAdId"].operator String().utf8();
+	k_InterstitialAdUnit = p_config["InterstitialAdId"].operator String().utf8();
+	k_RewardedVideoAdUnit = p_config["RewardedVideoAdId"].operator String().utf8();
 
 	admob::Initialize(*_app, k_AdMobAppID);
 
 	_adview_listener = new LoggingAdViewListener(this);
 	_interstitial_listener = new LoggingInterstitialAdListener(this);
 	_rewarded_ad_listener = new LoggingRewardedVideoListener(this);
+
+	admob::rewarded_video::Initialize();
 
 	_ad_view = new admob::BannerView();
 	_interstitialAd = new admob::InterstitialAd();
@@ -207,12 +221,10 @@ void GDAdMob::init(::firebase::App *app) {
 	_interstitialAd->InitializeLastResult().OnCompletion(
 			onInterstitialAdInitializeCompletionCallback, this);
 
-	/**
-	admob::rewarded_video::Destroy();
-	admob::rewarded_video::Initialize();
 	admob::rewarded_video::InitializeLastResult()
 			.OnCompletion(onRewardedVideoInitializeCompletionCallback, this);
-	**/
+
+	LOGI("Initialized:Admob");
 }
 
 admob::AdRequest GDAdMob::createAdRequest() {
@@ -295,6 +307,10 @@ void GDAdMob::onInterstitialInitialized() {
 				onInterstitialAdLoadAdCompletionCallback, this);
 	}
 #endif
+}
+
+void GDAdMob::onRewardedVideoInitialized() {
+
 }
 
 void GDAdMob::createBanner() {

@@ -13,6 +13,7 @@
 
 NS_GODOT_BEGINE
 
+#if GD_FIREBASE_ANDROID_IOS
 class MessageListener : public messaging::Listener {
 
 public:
@@ -33,6 +34,7 @@ public:
 private:
 	GDNotification *scene;
 };
+#endif
 
 GDNotification *GDNotification::mInstance = nullptr;
 GDNotification *GDNotification::getInstance() {
@@ -48,7 +50,9 @@ GDNotification::GDNotification() {
 }
 
 GDNotification::~GDNotification() {
+#if GD_FIREBASE_ANDROID_IOS
 	delete _app;
+#endif
 }
 
 #if GD_FIREBASE_ANDROID_IOS
@@ -56,8 +60,9 @@ void GDNotification::init(firebase::App *p_app) {
 	this->_app = p_app;
 
 	_message_listener = new MessageListener(this);
-
 	messaging::Initialize(*_app, _message_listener);
+
+	LOGI("Initialized:Notification/Messaging");
 }
 #endif
 

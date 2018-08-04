@@ -15,10 +15,23 @@
  **/
 
 #include "utils.h"
+#include "io/http_client.h"
 #include "io/json.h"
 #include "os/file_access.h"
 
 NS_GODOT_BEGINE
+
+const char *format_str(size_t c_size, const char *c_fmt, ...) {
+	va_list args;
+	char *buffer = 0;
+	buffer = new char[c_size];
+
+	va_start(args, c_fmt);
+	vsnprintf(buffer, c_size, c_fmt, args);
+	va_end(args);
+
+	return buffer;
+}
 
 int Utils::_script_id = -1;
 Error Utils::parse_file_dict(const String p_filepath, Dictionary &p_dest) {
@@ -67,5 +80,32 @@ Error Utils::open_file(const String p_filepath, String &p_dest) {
 
 	return OK;
 }
+
+String Utils::bytearray_to_string(const ByteArray &p_data) {
+    String s;
+    if (p_data.size() >= 0) {
+        ByteArray::Read r = p_data.read();
+
+        CharString cs;
+
+        cs.resize(p_data.size() + 1);
+        copymem(cs.ptr(), r.ptr(), p_data.size());
+
+        cs[p_data.size()] = 0;
+
+        s = cs.get_data();
+    }
+
+    return s;
+}
+
+Variant Utils::get_val(Dictionary p_dict, String p_key, String p_def_val) {
+    if (not p_dict.has(p_key)) {
+        return p_def_val;
+    }
+
+    return p_dict[p_key];
+}
+
 
 NS_GODOT_END

@@ -43,6 +43,8 @@ void GDRemoteConfig::init(firebase::App *app) {
 
 	remote_config::Initialize(*_app);
 	fetchRemoteConfigs();
+
+	LOGI("Initialized:RemoteConfig");
 }
 #endif
 
@@ -56,7 +58,7 @@ void GDRemoteConfig::setDefaultsFile(String p_filepath) {
 		ERR_FAIL_COND(err != OK);
 	}
 
-	GDRemoteConfig::setDefaults(l_dict);
+	//GDRemoteConfig::setDefaults(l_dict);
 #endif
 }
 
@@ -67,8 +69,8 @@ void GDRemoteConfig::setDefaults(const Dictionary p_defaults) {
 
 	for (unsigned int i = 0; i < p_defaults.size(); i++) {
 		remote_config::ConfigKeyValueVariant _key_val;
-		_key_val.key = (const char *)p_defaults.keys()[i].operator String().c_str();
-		_key_val.value = (const char *)p_defaults[p_defaults.keys()[i]].operator String().c_str();
+		_key_val.key = (const char *)p_defaults.keys()[i].operator String().utf8();
+		_key_val.value = (const char *)p_defaults[p_defaults.keys()[i]].operator String().utf8();
 
 		_defaults[i] = _key_val;
 	}

@@ -2,6 +2,7 @@
 
 #include "register_types.h"
 #include "gd_firebase.h"
+#include "gd_firestore.h"
 #include "globals.h"
 #include "object_type_db.h"
 
@@ -45,6 +46,7 @@ void register_gdfirebase_types() {
 #endif
 
 	ObjectTypeDB::register_type<godot::GDFireBase>();
+	ObjectTypeDB::register_type<godot::GDFirestore>();
 }
 
 void unregister_gdfirebase_types() {

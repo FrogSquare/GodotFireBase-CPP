@@ -4,8 +4,7 @@
 #define __GD_FIREBASE_H__
 
 #include "utils.h"
-
-#include "reference.h"
+#include "scene/main/node.h"
 
 #if GD_FIREBASE_ANDROID_IOS
 #include "firebase/analytics.h"
@@ -21,8 +20,8 @@
 
 NS_GODOT_BEGINE
 
-class GDFireBase : public Reference {
-	OBJ_TYPE(GDFireBase, Reference)
+class GDFireBase : public Node {
+	OBJ_TYPE(GDFireBase, Node)
 
 public:
 	GDFireBase();
@@ -59,9 +58,7 @@ public:
 	String getToken();
 #endif
 
-#if GD_FIREBASE_INVITES
 	void invite(String p_message, String p_deep_link);
-#endif
 
 #if GD_FIREBASE_REMOTECONFIG
 	void getRemoteValue(String p_key);
@@ -72,6 +69,34 @@ public:
 #if GD_FIREBASE_STORAGE
 	void download(String p_file, String p_path);
 	void upload(String p_file, String p_path);
+#endif
+
+    void load_document(String p_col_name, String p_doc_name, int callback_id);
+
+#if GD_FIREBASE_AUTHENTICATION
+	//AUth Google
+	void googleSignIn();
+	void googleSignOut();
+	bool isGoogleConnected();
+	void getGoogleUser();
+	void googleRevokeAccess();
+
+	//Auth Twitter
+	void twitterSignIn();
+	void twitterSignOut();
+	bool isTwitterConnected();
+
+	//Auth Facebook
+	void facebookSignIn();
+	void facebookSignOut();
+	bool isFacebookConnected();
+	void getFacebookPermissions();
+	bool facebookHasPermission();
+	void revokeFacebookPermision();
+	void facebookRevokeAccess();
+	void askFacebookReadPermission();
+	void askFacebookPublishPermission();
+	void getFacebookUser();
 #endif
 
 #ifdef ANDROID_ENABLED

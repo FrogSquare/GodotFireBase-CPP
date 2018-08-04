@@ -30,6 +30,10 @@
 #include "firebase/admob/interstitial_ad.h"
 #include "firebase/admob/rewarded_video.h"
 
+#ifdef IPHONE_ENABLED
+//#include "ios_common.h"
+#endif
+
 namespace admob = ::firebase::admob;
 #endif
 
@@ -60,9 +64,10 @@ static const int k_BirthdayYear = 1976;
 class GDAdMob {
 public:
 	GDAdMob();
+	virtual ~GDAdMob();
 
 #if GD_FIREBASE_ANDROID_IOS
-	void init(::firebase::App *app);
+	void init(::firebase::App *app, Dictionary p_config);
 	admob::AdRequest createAdRequest();
 #endif
 
@@ -80,6 +85,7 @@ public:
 
 	void onAdViewInitialized();
 	void onInterstitialInitialized();
+	void onRewardedVideoInitialized();
 
 	static GDAdMob *getInstance();
 

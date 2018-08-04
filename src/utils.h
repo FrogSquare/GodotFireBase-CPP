@@ -25,6 +25,8 @@
 #include "os/file_access.h"
 #include "print_string.h"
 
+#include "core/variant.h"
+
 #if GD_FIREBASE_ANDROID_IOS
 #include "jnihelper.h"
 #endif
@@ -39,7 +41,10 @@ public:
 	static Error open_file(const String p_filepath, String &p_dest);
 	static Error parse_file_dict(const String p_filepath, Dictionary &p_dest);
 
+    static Variant get_val(Dictionary p_dict, String p_key, String p_def_val);
 	static void call_scritp_func(String p_from, String p_key, Variant p_value);
+
+    static String bytearray_to_string(const ByteArray &p_data);
 
 	inline static void set_script_id(int p_script_id) { _script_id = p_script_id; }
 
