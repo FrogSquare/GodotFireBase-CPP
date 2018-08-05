@@ -30,6 +30,8 @@ void GDFirestore::init(::firebase::App *p_app) {
     add_child(download);
 
     download->connect("request_completed", this, "_http_download_completed");  
+
+	LOGI("Initialized:Firestore");
 }
 #endif
 

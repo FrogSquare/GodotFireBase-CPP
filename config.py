@@ -38,21 +38,21 @@ def configure(env):
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     if _config["AdMob"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-ads:11.6.0'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-ads:15.0.1'")
 
         cpp_defines.append('GD_FIREBASE_ADMOB')
         linkflags.append('admob')
 
     if _config["RemoteConfig"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-config:11.6.0'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-config:16.0.0'")
 
         cpp_defines.append('GD_FIREBASE_REMOTECONFIG')
         linkflags.append('remote_config')
 
     if _config["Notification"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-messaging:11.6.0'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-messaging:17.1.0'")
             env.android_add_dependency("compile 'com.google.firebase.messaging.cpp:firebase_messaging_cpp@aar'")
             env.android_add_dependency("compile 'com.firebase:firebase-jobdispatcher:0.5.2'")
 
@@ -61,21 +61,21 @@ def configure(env):
 
     if _config["Invites"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-invites:11.6.0'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-invites:16.0.1'")
 
         cpp_defines.append('GD_FIREBASE_INVITES')
         linkflags.append('invites')
 
     if _config["Storage"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-storage:11.6.0'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-storage:16.0.1'")
 
         cpp_defines.append('GD_FIREBASE_STORAGE')
         linkflags.append('storage')
 
     if _config["Authentication"]:
         if env["platform"] == "android":
-            pass
+            env.android_add_dependency("compile 'com.google.firebase:firebase-auth:16.0.2'")
             
         cpp_defines.append('GD_FIREBASE_AUTHENTICATION')
         linkflags.append('auth')
@@ -90,9 +90,8 @@ def configure(env):
         env.android_add_gradle_classpath("com.google.gms:google-services:3.0.0")
         env.android_add_gradle_plugin("com.google.gms.google-services")
 
-        env.android_add_dependency("compile 'com.google.firebase:firebase-core:11.6.0'")
-        env.android_add_dependency("compile 'com.google.firebase:firebase-common:11.6.0'")
-        env.android_add_dependency("compile 'com.google.android.gms:play-services-base:11.6.0'")
+        env.android_add_dependency("compile 'com.google.firebase:firebase-core:16.0.1'")
+        env.android_add_dependency("compile 'com.google.android.gms:play-services-base:15.0.1'")
         env.android_add_dependency("compile 'commons-codec:commons-codec:1.10'")
 
         env.android_add_default_config("applicationId '"+ p_app_id +"'")

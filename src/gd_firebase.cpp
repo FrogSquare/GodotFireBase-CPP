@@ -48,24 +48,24 @@ void GDFireBase::initFireBase() {
     if (_config["AdMob"]) {
     	GDAdMob::getInstance()->init(this->app, _config["Ads"]);
     }
-    else if (_config["Authentication"]) {
+    if (_config["Authentication"]) {
         //GDAuthentication::getInstance()->init(this->app, _config["AuthConf"]);
     }
-    else if (_config["Invites"]) {
+    if (_config["Invites"]) {
 #if GD_FIREBASE_INVITES
         GDInvite::getInstance()->init(this->app);
 #endif
     }
-    else if (_config["RemoteConfig"]) {
+    if (_config["RemoteConfig"]) {
     	GDRemoteConfig::getInstance()->init(this->app);
     }
-    else if (_config["Notification"]) {
+    if (_config["Notification"]) {
     	GDNotification::getInstance()->init(this->app);
     }
-    else if (_config["Storage"]) {
+    if (_config["Storage"]) {
         //GDStorage::getInstance()->init(this->app);
     }
-    else if (_config["Firestore"]) {
+    if (_config["Firestore"]) {
         add_child(GDFirestore::getInstance());
 
         GDFirestore::getInstance()->init(this->app);
