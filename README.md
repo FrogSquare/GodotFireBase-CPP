@@ -70,3 +70,13 @@ or by using a `.json` file
     firebase.init_with_file("res://godot-firebase-config.json", get_instance_ID())
 ```
 
+# Build Error
+```
+The library com.google.android.gms:play-services-measurement-base is being requested by various other libraries at [[15.0.4,15.0.4], [16.0.2,16.0.2]], but resolves to 16.0.2. Disable the plugin and check your dependencies tree using ./gradlew :app:dependencies
+```
+
+To fix the error add the following to `platform/android/build.gradle.template`
+```
+com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
+```
+

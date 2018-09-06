@@ -52,16 +52,16 @@ def configure(env):
 
     if _config["Notification"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-messaging:17.1.0'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-messaging:17.3.0'")
             env.android_add_dependency("compile 'com.google.firebase.messaging.cpp:firebase_messaging_cpp@aar'")
-            env.android_add_dependency("compile 'com.firebase:firebase-jobdispatcher:0.5.2'")
+            env.android_add_dependency("compile 'com.firebase:firebase-jobdispatcher:0.8.5'")
 
         cpp_defines.append('GD_FIREBASE_NOTIFICATION')
         linkflags.append('messaging')
 
     if _config["Invites"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-invites:16.0.1'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-invites:16.0.3'")
 
         cpp_defines.append('GD_FIREBASE_INVITES')
         linkflags.append('invites')
@@ -75,7 +75,7 @@ def configure(env):
 
     if _config["Authentication"]:
         if env["platform"] == "android":
-            env.android_add_dependency("compile 'com.google.firebase:firebase-auth:16.0.2'")
+            env.android_add_dependency("compile 'com.google.firebase:firebase-auth:16.0.3'")
             
         cpp_defines.append('GD_FIREBASE_AUTHENTICATION')
         linkflags.append('auth')
@@ -87,10 +87,10 @@ def configure(env):
         env.android_add_maven_repository("url 'https://oss.sonatype.org/content/repositories/snapshots'")
 
         env.android_add_flat_dir(cur_dir + p_firebase_sdk + "/android/")
-        env.android_add_gradle_classpath("com.google.gms:google-services:3.0.0")
+        env.android_add_gradle_classpath("com.google.gms:google-services:4.1.0")
         env.android_add_gradle_plugin("com.google.gms.google-services")
 
-        env.android_add_dependency("compile 'com.google.firebase:firebase-core:16.0.1'")
+        env.android_add_dependency("compile 'com.google.firebase:firebase-core:16.0.3'")
         env.android_add_dependency("compile 'com.google.android.gms:play-services-base:15.0.1'")
         env.android_add_dependency("compile 'commons-codec:commons-codec:1.10'")
 

@@ -42,13 +42,16 @@ void GDRemoteConfig::init(firebase::App *app) {
 	this->_app = app;
 
 	remote_config::Initialize(*_app);
-	fetchRemoteConfigs();
 
 	LOGI("Initialized:RemoteConfig");
+
+	fetchRemoteConfigs();
 }
 #endif
 
 void GDRemoteConfig::setDefaultsFile(String p_filepath) {
+    LOGI("RemoteConfig:Setting Default File: %s", p_filepath.utf8().get_data());
+
 #if GD_FIREBASE_ANDROID_IOS
 	//remote_config::ConfigSetting;
 	Dictionary l_dict = Dictionary();
@@ -63,6 +66,8 @@ void GDRemoteConfig::setDefaultsFile(String p_filepath) {
 }
 
 void GDRemoteConfig::setDefaults(const Dictionary p_defaults) {
+    LOGI("RemoteConfig:Setting Defaults from dict");
+
 #if GD_FIREBASE_ANDROID_IOS
 	remote_config::ConfigKeyValueVariant *_defaults =
 			new remote_config::ConfigKeyValueVariant[p_defaults.size()];
@@ -81,8 +86,11 @@ void GDRemoteConfig::setDefaults(const Dictionary p_defaults) {
 }
 
 void GDRemoteConfig::fetchRemoteConfigs() {
+    LOGI("RemoteConfig:Fetching Remote Config");
+
 #if GD_FIREBASE_ANDROID_IOS
 	const int cacheExpire = 3000;
+
 	remote_config::Fetch(cacheExpire)
 			.OnCompletion([](const firebase::Future<void> &call, void *user_data) {
 
@@ -97,7 +105,9 @@ void GDRemoteConfig::fetchRemoteConfigs() {
 }
 
 Variant GDRemoteConfig::getValue(const String key, const String p_namespace) {
+    LOGI("RemoteConfig:GetValue");
 	Variant ret;
+
 #if GD_FIREBASE_ANDROID_IOS
 	const char *_key = (const char *)key.c_str();
 	const char *_namespace = (const char *)p_namespace.c_str();
