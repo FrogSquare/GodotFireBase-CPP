@@ -12,13 +12,13 @@
 #ifndef GD_FIRESTORE_H
 #define GD_FIRESTORE_H
 
+#include <version_generated.gen.h>
+
 #include "utils.h"
 #include "scene/main/http_request.h"
 
 #if GD_FIREBASE_ANDROID_IOS
-
 #include "firebase/app.h"
-
 #ifdef IPHONE_ENABLED
 //#include "ios_common.h"
 #endif
@@ -30,7 +30,11 @@
 NS_GODOT_BEGINE
 
 class GDFirestore : public Node {
-    OBJ_TYPE(GDFirestore, Node)
+#if VERSION_MAJOR == 3
+    GDCLASS(GDFirestore, Reference);
+#else
+    OBJ_TYPE(GDFirestore, Reference);
+#endif
 
 public:
 	GDFirestore() {}

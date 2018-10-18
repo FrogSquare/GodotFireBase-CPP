@@ -1,10 +1,17 @@
 /** register_types.cpp **/
+#include <version_generated.gen.h>
 
 #include "register_types.h"
 #include "gd_firebase.h"
 #include "gd_firestore.h"
-#include "globals.h"
+
+#if VERSION_MAJOR == 3
+#include <core/class_db.h>
+#include <core/engine.h>
+#else
 #include "object_type_db.h"
+#include "globals.h"
+#endif
 
 #ifdef ANDROID_ENABLED
 #include "jnihelper.h"
@@ -45,8 +52,13 @@ void register_gdfirebase_types() {
 	}
 #endif
 
+#if VERSION_MAJOR == 3
+    ClassDB::register_class<godot::GDFireBase>();
+    ClassDB::register_class<godot::GDFirestore>();
+#else
 	ObjectTypeDB::register_type<godot::GDFireBase>();
 	ObjectTypeDB::register_type<godot::GDFirestore>();
+#endif
 }
 
 void unregister_gdfirebase_types() {

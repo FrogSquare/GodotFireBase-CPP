@@ -31,7 +31,6 @@ cpp_defines = ['GD_FIREBASE_ANALYTICS']
 linkflags = ['app', 'analytics']
 
 def can_build(plat):
-    #return False;
     return (plat == "android" or plat == "x11" or plat == "iphone")
 
 def configure(env):
@@ -90,7 +89,8 @@ def configure(env):
         env.android_add_gradle_classpath("com.google.gms:google-services:4.1.0")
         env.android_add_gradle_plugin("com.google.gms.google-services")
 
-        env.android_add_dependency("compile 'com.google.firebase:firebase-core:16.0.3'")
+        env.android_add_dependency("compile 'com.google.firebase:firebase-core:16.0.1'")
+        env.android_add_dependency("compile 'com.google.firebase:firebase-analytics:16.0.1'")
         env.android_add_dependency("compile 'com.google.android.gms:play-services-base:15.0.1'")
         env.android_add_dependency("compile 'commons-codec:commons-codec:1.10'")
 
@@ -111,7 +111,7 @@ def configure(env):
             pass
 
         print(firebase_sdk_libs)
-        print(_linkflags)
+        print(GREEN + "FireBase: " + RESET + "[" + _linkflags[1:-1] + "]")
 
         env.Append(LIBPATH=[firebase_sdk_libs])
         env.Append(LIBS=_linkflags)

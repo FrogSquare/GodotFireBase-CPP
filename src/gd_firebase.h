@@ -3,6 +3,8 @@
 #ifndef __GD_FIREBASE_H__
 #define __GD_FIREBASE_H__
 
+#include <version_generated.gen.h>
+
 #include "utils.h"
 #include "scene/main/node.h"
 
@@ -21,7 +23,11 @@
 NS_GODOT_BEGINE
 
 class GDFireBase : public Node {
-	OBJ_TYPE(GDFireBase, Node)
+#if VERSION_MAJOR == 3
+    GDCLASS(GDFireBase, Reference);
+#else
+    OBJ_TYPE(GDFireBase, Reference);
+#endif
 
 public:
 	GDFireBase();
